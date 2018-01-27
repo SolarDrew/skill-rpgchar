@@ -34,7 +34,7 @@ async def confirm_existence(opsdroid, config, message):
     await opsdroid.memory.put('pcs', mem_pcs)
 
 
-@match_regex('who am I')
+@match_regex('who am I', case_sensitive=False)
 async def whoami(opsdroid, config, message):
     pcs = await opsdroid.memory.get('pcs')
     char = Character(**pcs[message.user])
