@@ -45,8 +45,7 @@ async def get_character(name, opsdroid, config, message):
 
 @match_regex('who am I', case_sensitive=False)
 async def whoami(opsdroid, config, message):
-    pcs = await opsdroid.memory.get('pcs')
-    char = Character(**pcs[message.user])
+    char = await get_character(message.user, opsdroid, config, message)
 
     await message.respond(f"You are {char}, a fearless adventurer!")
 
@@ -83,11 +82,7 @@ async def damage(opsdroid, config, message):
     target = match('target')
 
     pcs = await opsdroid.memory.get('pcs')
-    if target in pcs.keys():
-        char = Character(**pcs[target])
-    else:
-        await message.respond(f"I'm not familiar with any character by the name of {target}")
-        return
+    char = await get_character(target, opsdroid, config, message)
 
     char.take_damage(ndamage)
     pcs[target] = char.__dict__
