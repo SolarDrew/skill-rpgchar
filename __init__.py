@@ -55,9 +55,11 @@ async def howami(opsdroid, config, message):
     pcs = await opsdroid.memory.get('pcs')
     name = message.regex.group('name')
     if name.upper() == 'I':
-        char = Character(**pcs[message.user])
+        name = message.user
+        prefix = "You're"
     else:
-        char = Character(**pcs[name])
+        prefix = "They're"
+    char = await get_character(name, opsdroid, config, message)
 
     state = char.current_hp / char.max_hp
     if state == 1:
@@ -69,7 +71,7 @@ async def howami(opsdroid, config, message):
     else:
         state_message = 'in mortal peril!'
 
-    await message.respond(f"You're {state_message} ({char.current_hp}/{char.max_hp})")
+    await message.respond(f"{prefix} {state_message} ({char.current_hp}/{char.max_hp})")
 
 
 @match_regex('deals? (?P<ndamage>\d+) damage to (?P<target>.*)', case_sensitive=False)
