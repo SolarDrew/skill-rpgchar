@@ -71,3 +71,21 @@ async def howami(opsdroid, config, message):
 
     await message.respond(f"You're {state_message} ({char.current_hp}/{char.max_hp})")
 
+
+@match_regex('deals? (?P<ndamage>\d+) damage to (?P<target>.*)', case_sensitive=False)
+async def damage(opsdroid, config, message):
+    match = message.regex.group
+    ndamage = int(match('ndamage'))
+    target = match('target')
+
+    pcs = await opsdroid.memory.get('pcs')
+    if target in pcs.keys():
+        char = Character(**pcs[target])
+    else:
+        await message.respond(f"I'm not familiar with any character by the name of {target}")
+        return
+
+    char.take_damage(ndamage)
+    pcs[target] = char.__dict__
+    await opsdroid.memory.put('pcs', pcs)
+    await message.respond(f"Something is dealing {ndamage} to {target}")
