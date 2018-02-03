@@ -2,15 +2,16 @@ import logging
 from opsdroid.matchers import match_always, match_regex
 
 class Character:
-    def __init__(self, name, max_hp, race, charclass, current_hp=None):
+    def __init__(self, name, max_hp, race, class_, current_hp=None, weapons=[]):
         self.name = name
         self.race = race
-        self.class_ = charclass
-        self.max_health = max_hp
+        self.class_ = class_
+        self.max_hp = max_hp
         if current_hp:
             self.current_hp = current_hp
         else:
             self.current_hp = max_hp
+        weapons = weapons
 
     def __repr__(self):
         return f"{self.name} ({self.race} {self.class_})"
