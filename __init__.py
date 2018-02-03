@@ -27,18 +27,20 @@ def setup(opsdroid):
     logging.debug("Loaded rpgchar module")
 
 
-@match_always
-async def confirm_existence(opsdroid, config, message):
+async def get_character(name, opsdroid, config, message):
     mem_pcs = await opsdroid.memory.get('pcs')
     if not mem_pcs:
         mem_pcs = {}
 
-    if message.user not in mem_pcs.keys():
-        await message.respond(f"Character {message.user} not in memory - creating from config.")
-        charstats = config['pcs'][message.user]
-        mem_pcs[message.user] = charstats
+    if name not in mem_pcs.keys():
+        charstats = config['pcs'][name]
+        mem_pcs[name] = charstats
+        await message.respond(f"Character {name} not in memory - loaded from config.")
+    else:
+        charstats = mem_pcs[name]
 
     await opsdroid.memory.put('pcs', mem_pcs)
+    return Character(**charstats)
 
 
 @match_regex('who am I', case_sensitive=False)
