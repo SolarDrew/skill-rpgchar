@@ -47,3 +47,27 @@ async def whoami(opsdroid, config, message):
     char = Character(**pcs[message.user])
 
     await message.respond(f"You are {char}, a fearless adventurer!")
+
+
+@match_regex('how (am|is) (?P<name>.*)', case_sensitive=False)
+# @match_rasanlu('hp-status')
+async def howami(opsdroid, config, message):
+    pcs = await opsdroid.memory.get('pcs')
+    name = message.regex.group('name')
+    if name.upper() == 'I':
+        char = Character(**pcs[message.user])
+    else:
+        char = Character(**pcs[name])
+
+    state = char.current_hp / char.max_hp
+    if state == 1:
+        state_message = 'completely unharmed!'
+    elif state > 0.5:
+        state_message = 'feeling alright'
+    elif state > 0.1:
+        state_message = 'not feeling great'
+    else:
+        state_message = 'in mortal peril!'
+
+    await message.respond(f"You're {state_message} ({char.current_hp}/{char.max_hp})")
+
