@@ -15,6 +15,12 @@ class Character:
     def __repr__(self):
         return f"{self.name} ({self.race} {self.class_})"
 
+    def take_damage(self, n):
+        self.current_hp -= n
+
+    def heal(self, n):
+        self.current_hp = min(self.max_hp, self.current_hp+n)
+
 
 def setup(opsdroid):
     logging.debug("Loaded rpgchar module")
