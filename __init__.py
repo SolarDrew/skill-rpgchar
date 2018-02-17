@@ -2,26 +2,43 @@ import logging
 from opsdroid.matchers import match_always, match_regex
 
 class Character:
-    def __init__(self, name, max_hp, race, class_, current_hp=None, weapons=[]):
+    def __init__(self, name, level, max_hp, race, class_, AC, abilities, current_hp=None, weapons={}):
         self.name = name
+        self.level = level # Change this to XP and calculate level
         self.race = race
         self.class_ = class_
         self.max_hp = max_hp
+        self.AC = AC # Replace this with a property that calculates AC
+        self.abilities = abilities
+
         if current_hp:
             self.current_hp = current_hp
         else:
             self.current_hp = max_hp
-        weapons = weapons
+        self.weapons = weapons
+
+        self.unconscious = False
+        self.death_saves = {'success': 0, 'fail': 0}
 
     def __repr__(self):
-        return f"{self.name} ({self.race} {self.class_})"
+        return f"{self.name} ({self.race} {self.class_} {self.level})"
 
     def take_damage(self, n):
         self.current_hp -= n
+        if self.current_hp <= self.max_hp / 2:
+            self.die()
+        elif self.current_hp < 0:
+            self.unconscious = True
 
     def heal(self, n):
         self.current_hp = min(self.max_hp, self.current_hp+n)
 
+    def modifier(self, ability):
+        return (self.abilities[ability]-10) // 2
+
+    @property
+    def proficiency(self):
+        return 2 # this obviously needs to change
 
 def setup(opsdroid):
     logging.debug("Loaded rpgchar module")
