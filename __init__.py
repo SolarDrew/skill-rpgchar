@@ -1,5 +1,11 @@
 import logging
 from opsdroid.matchers import match_always, match_regex
+# Regex definitions
+OBJECT = '(?P<obname>.*)' # in grammatical sense - person who is acting
+SUBJECT = '(?P<subname>.*)' # acted upon
+ATK_VERB = '(hits?|attacks?|swings? at)'
+WEAPON = '(?P<weapon>.*)'
+
 
 class Character:
     def __init__(self, name, level, max_hp, race, class_, AC, abilities, current_hp=None, weapons={}):
@@ -84,11 +90,11 @@ async def whoami(opsdroid, config, message):
     await message.respond(f"You are {char}, a fearless adventurer!")
 
 
-@match_regex('how (am|is) (?P<name>.*)', case_sensitive=False)
+@match_regex(f"how ('?s|am|is) {SUBJECT}", case_sensitive=False)
 # @match_rasanlu('hp-status')
 async def howami(opsdroid, config, message):
     pcs = await opsdroid.memory.get('pcs')
-    name = message.regex.group('name')
+    name = message.regex.group('subname')
     if name.upper() == 'I':
         name = message.user
         prefix = "You're"
@@ -109,8 +115,8 @@ async def howami(opsdroid, config, message):
     await message.respond(f"{prefix} {state_message} ({char.current_hp}/{char.max_hp})")
 
 
-@match_regex('deals? (?P<ndamage>\d+) damage to (?P<target>.*)', case_sensitive=False)
-async def damage(opsdroid, config, message):
+@match_regex(f'{OBJECT} {ATK_VERB} {SUBJECT} with (my|a) {WEAPON}', case_sensitive=False)
+async def attack(opsdroid, config, message):
     match = message.regex.group
     ndamage = int(match('ndamage'))
     target = match('target')
