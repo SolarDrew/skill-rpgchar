@@ -1,5 +1,11 @@
 import logging
 from opsdroid.matchers import match_always, match_regex
+from numpy.random import randint
+import re
+import yaml
+from functools import partial
+
+
 # Regex definitions
 OBJECT = '(?P<obname>.*)' # in grammatical sense - person who is acting
 SUBJECT = '(?P<subname>.*)' # acted upon
@@ -118,13 +124,58 @@ async def howami(opsdroid, config, message):
 @match_regex(f'{OBJECT} {ATK_VERB} {SUBJECT} with (my|a) {WEAPON}', case_sensitive=False)
 async def attack(opsdroid, config, message):
     match = message.regex.group
-    ndamage = int(match('ndamage'))
-    target = match('target')
-
     pcs = await opsdroid.memory.get('pcs')
-    char = await get_character(target, opsdroid, config, message)
 
-    char.take_damage(ndamage)
-    pcs[target] = char.__dict__
-    await message.respond(f"Something is dealing {ndamage} to {target}")
+    # Get characters
+    atkr_name = match('obname')
+    if atkr_name.upper() == 'I':
+        atkr_name = message.user
+    attacker = await get_character(atkr_name, opsdroid, config, message)
+    def_name = match('subname')
+    defender = await get_character(def_name, opsdroid, config, message)
+    weapon = attacker.weapons[match('weapon')]
+
+    atk_report, defender = weapon_attack(attacker, defender, weapon)
+
     await put_character(defender, opsdroid)
+    for msg in atk_report:
+        await message.respond(msg)
+
+
+def weapon_attack(attacker, defender, weapon):
+    # Info
+    atkr_name = attacker.name.split()[0] if ' ' in attacker.name else attacker.name
+    def_name = defender.name.split()[0] if ' ' in defender.name else defender.name
+    hitmiss = 'misses'
+
+    # Make attack roll
+    base_roll = randint(1, 21)
+    mod = attacker.modifier('Str')
+    atk_roll = [base_roll, attacker.proficiency, mod]
+    atk_total = sum(atk_roll)
+    if atk_total >= defender.AC or base_roll == 20 and base_roll != 1:
+        hitmiss = 'hits'
+        match = re.match("(?P<ndice>\d+)?(?:d(?P<dice>\d+))", weapon)
+        ndice = match.group('ndice')
+        ndice = int(ndice) if ndice else 1
+        ndice = ndice * 2 if base_roll == 20 else ndice
+        dice = int(match.group('dice'))
+
+        rolls = list(map(partial(randint, 1), [dice+1]*ndice)) + [mod]
+        total_damage = sum(rolls)
+
+        defender.take_damage(total_damage)
+    else:
+        total_damage = 0
+    critmod = ' critically ' if base_roll in [1, 20] else ' '
+
+    # Report basic result of the attack
+    report = [f"{atkr_name}{critmod}{hitmiss} {def_name}! "]
+    # Add the roll, modifiers and total
+    report[0] += f"({' + '.join(str(n) for n in atk_roll)} = {sum(atk_roll)}) !"
+    # Add damage roll, modifiers and total, if any
+    if total_damage > 0:
+        report.append(f"{def_name.title()} takes {total_damage} damage ")
+        report[1] += f"({' + '.join(str(r) for r in rolls)}) !"
+
+    return report, defender
