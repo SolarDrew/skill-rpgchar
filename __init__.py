@@ -40,24 +40,41 @@ class Character:
     def proficiency(self):
         return 2 # this obviously needs to change
 
+
 def setup(opsdroid):
     logging.debug("Loaded rpgchar module")
 
 
 async def get_character(name, opsdroid, config, message):
-    mem_pcs = await opsdroid.memory.get('pcs')
-    if not mem_pcs:
-        mem_pcs = {}
 
-    if name not in mem_pcs.keys():
-        charstats = config['pcs'][name]
-        mem_pcs[name] = charstats
+    # Remove burden of case-sensitivity from the user
+    name = name.title()
+
+    # Ensure that a list of the PCs exists
+    pcs = await opsdroid.memory.get('pcs')
+    if not pcs:
+        pcs = {}
+        await opsdroid.memory.put('pcs', pcs)
+
+    if name not in pcs.keys():
+        pcinfo = config['pcs'][name]
+        if isinstance(config['pcs'][name], str):
+            with open(pcinfo) as f:
+                pcinfo = yaml.safe_load(f)
+        charstats = pcinfo
+        char = Character(**charstats)
+        await put_character(char, opsdroid)
         await message.respond(f"Character {name} not in memory - loaded from config.")
-    else:
-        charstats = mem_pcs[name]
+        return char
 
-    await opsdroid.memory.put('pcs', mem_pcs)
+    charstats = pcs[name]
     return Character(**charstats)
+
+
+async def put_character(char, opsdroid):
+    pcs = await opsdroid.memory.get('pcs')
+    pcs[char.name.split()[0]] = char.__dict__
+    await opsdroid.memory.put('pcs', pcs)
 
 
 @match_regex('who am I', case_sensitive=False)
@@ -103,5 +120,5 @@ async def damage(opsdroid, config, message):
 
     char.take_damage(ndamage)
     pcs[target] = char.__dict__
-    await opsdroid.memory.put('pcs', pcs)
     await message.respond(f"Something is dealing {ndamage} to {target}")
+    await put_character(defender, opsdroid)
