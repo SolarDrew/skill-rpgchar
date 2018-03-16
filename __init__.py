@@ -19,7 +19,9 @@ def setup(opsdroid):
 
 
 class Character:
-    def __init__(self, name, level, max_hp, race, class_, AC, abilities, current_hp=None, weapons={}):
+    def __init__(self, name, level, max_hp, race, class_, AC, abilities,
+                 current_hp=None, weapons=None, unconscious=False,
+                 death_saves={'success': 0, 'fail': 0}):
         self.name = name
         self.level = level # Change this to XP and calculate level
         self.race = race
@@ -34,27 +36,38 @@ class Character:
             self.current_hp = max_hp
         self.weapons = weapons
 
-        self.unconscious = False
-        self.death_saves = {'success': 0, 'fail': 0}
+        self.unconscious = unconscious
+        self.death_saves = death_saves
 
     def __repr__(self):
         return f"{self.name} ({self.race} {self.class_} {self.level})"
 
-    def take_damage(self, n):
-        self.current_hp -= n
+    def take_damage(self, ndamage):
+        """Handle removing of health from the character by e.g. a weapon attack."""
+        # Damage happens
+        self.current_hp -= ndamage
+
+        # Need to handle cases in which damage causes unconsciousness or death
         if self.current_hp <= self.max_hp / 2:
             self.die()
         elif self.current_hp < 0:
             self.unconscious = True
 
-    def heal(self, n):
-        self.current_hp = min(self.max_hp, self.current_hp+n)
+    def heal(self, nhealth):
+        """Add health to the character up to their maximum hit points."""
+        self.current_hp = min(self.max_hp, self.current_hp+nhealth)
 
     def modifier(self, ability):
+        """Return the modifier for a given ability"""
         return (self.abilities[ability]-10) // 2
+
+    def die(self):
+        """Remove the character from the game without pissing off the player"""
+        pass
 
     @property
     def proficiency(self):
+        """Return the character's proficiency bonus as determined by level"""
         return 2 # this obviously needs to change
 
 
