@@ -98,6 +98,7 @@ async def get_character(name, opsdroid, config, message):
 
 
 async def put_character(char, opsdroid):
+    """Save a character into memory"""
     pcs = await opsdroid.memory.get('pcs')
     pcs[char.name.split()[0]] = char.__dict__
     await opsdroid.memory.put('pcs', pcs)
@@ -105,15 +106,15 @@ async def put_character(char, opsdroid):
 
 @match_regex('who am I', case_sensitive=False)
 async def whoami(opsdroid, config, message):
+    """Basic reporting of character identity"""
     char = await get_character(message.user, opsdroid, config, message)
 
     await message.respond(f"You are {char}, a fearless adventurer!")
 
 
 @match_regex(f"how ('?s|am|is) {SUBJECT}", case_sensitive=False)
-# @match_rasanlu('hp-status')
 async def howami(opsdroid, config, message):
-    pcs = await opsdroid.memory.get('pcs')
+    """Basic reporting of characters' current health."""
     name = message.regex.group('subname')
     if name.upper() == 'I':
         name = message.user
@@ -135,28 +136,11 @@ async def howami(opsdroid, config, message):
     await message.respond(f"{prefix} {state_message} ({char.current_hp}/{char.max_hp})")
 
 
-@match_regex(f'{OBJECT} {ATK_VERB} {SUBJECT} with (my|a) {WEAPON}', case_sensitive=False)
-async def attack(opsdroid, config, message):
-    match = message.regex.group
-    pcs = await opsdroid.memory.get('pcs')
-
-    # Get characters
-    atkr_name = match('obname')
-    if atkr_name.upper() == 'I':
-        atkr_name = message.user
-    attacker = await get_character(atkr_name, opsdroid, config, message)
-    def_name = match('subname')
-    defender = await get_character(def_name, opsdroid, config, message)
-    weapon = attacker.weapons[match('weapon')]
-
-    atk_report, defender = weapon_attack(attacker, defender, weapon)
-
-    await put_character(defender, opsdroid)
-    for msg in atk_report:
-        await message.respond(msg)
-
-
 def weapon_attack(attacker, defender, weapon):
+    """
+    Mechanical crunchy bits of actually making a weapon attack.
+    Die rolls, damage, all that fun stuff
+    """
     # Info
     atkr_name = attacker.name.split()[0] if ' ' in attacker.name else attacker.name
     def_name = defender.name.split()[0] if ' ' in defender.name else defender.name
@@ -193,3 +177,43 @@ def weapon_attack(attacker, defender, weapon):
         report[1] += f"({' + '.join(str(r) for r in rolls)}) !"
 
     return report, defender
+
+
+@match_regex(f'{OBJECT} {ATK_VERB} {SUBJECT} with (my|a) {WEAPON}', case_sensitive=False)
+async def attack(opsdroid, config, message):
+    """
+    Detect when a character is attacking another character.
+    Just handles the overall flow of the interaction, rolls are dealt with elsewhere.
+    """
+    match = message.regex.group
+
+    # Get characters
+    atkr_name = match('obname')
+    if atkr_name.upper() == 'I':
+        atkr_name = message.user
+    attacker = await get_character(atkr_name, opsdroid, config, message)
+    def_name = match('subname')
+    defender = await get_character(def_name, opsdroid, config, message)
+    weapon = attacker.weapons[match('weapon')]
+
+    atk_report, defender = weapon_attack(attacker, defender, weapon)
+
+    await put_character(defender, opsdroid)
+    for msg in atk_report:
+        await message.respond(msg)
+
+
+@match_regex(f'(you|we) (take|have) a long rest', case_sensitive=False)
+async def long_rest(opsdroid, config, message):
+    """
+    Do all the long rest things.
+    At the moment this consists solely of giving everyone their hit points back.
+    """
+
+    pcs = await opsdroid.memory.get('pcs')
+    for charname in pcs.keys():
+        if charname.lower() == '_id':
+            continue
+        char = await get_character(charname, opsdroid, config, message)
+        char.current_hp = char.max_hp
+        await put_character(char, opsdroid)
