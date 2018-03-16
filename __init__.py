@@ -9,11 +9,7 @@ from numpy.random import randint
 import yaml
 from opsdroid.matchers import match_regex
 
-# Regex definitions
-OBJECT = '(?P<obname>.*)' # in grammatical sense - person who is acting
-SUBJECT = '(?P<subname>.*)' # acted upon
-ATK_VERB = '(hits?|attacks?|swings? at)'
-WEAPON = '(?P<weapon>.*)'
+from .constants.regex_constants import *
 # from .combat import attack
 # from .characters import whoami, howami
 
