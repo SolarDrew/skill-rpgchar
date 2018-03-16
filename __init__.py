@@ -14,6 +14,10 @@ from .constants.regex_constants import *
 # from .characters import whoami, howami
 
 
+def setup(opsdroid):
+    logging.debug("Loaded rpgchar module - ready to play Role-Playing Games!")
+
+
 class Character:
     def __init__(self, name, level, max_hp, race, class_, AC, abilities, current_hp=None, weapons={}):
         self.name = name
@@ -52,10 +56,6 @@ class Character:
     @property
     def proficiency(self):
         return 2 # this obviously needs to change
-
-
-def setup(opsdroid):
-    logging.debug("Loaded rpgchar module")
 
 
 async def get_character(name, opsdroid, config, message):
