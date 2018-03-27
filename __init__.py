@@ -217,3 +217,16 @@ async def long_rest(opsdroid, config, message):
         char = await get_character(charname, opsdroid, config, message)
         char.current_hp = char.max_hp
         await put_character(char, opsdroid)
+
+
+@match_regex('tell the dm', case_sensitive=False)
+async def tell_dm(opsdroid, config, message):
+    """
+    Relay a message to the private chat with the DM.
+    Entirely for testing purposes at this point.
+    """
+
+    text = message.text.lower().replace('tell the dm', f'{message.user} says:')
+
+    await message.respond(text, room='DM-private')
+
