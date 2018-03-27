@@ -230,3 +230,23 @@ async def tell_dm(opsdroid, config, message):
 
     await message.respond(text, room='DM-private')
 
+
+@match_regex('roll initiative', case_sensitive=False)
+async def create_initiative(opsdroid, config, message):
+    """
+    Roll initiative for everyone in the list of characters and store a list of those rolls.
+    """
+
+    chars = config['chars'].keys()
+    inits = {}
+    for charname in chars:
+        if charname.lower() == '_id':
+            continue
+        char = await get_character(charname, opsdroid, config, message)
+        inits[charname] = randint(1, 21) + char.modifier('Dex')
+
+    for char in sorted(inits, key=inits.get, reverse=True):
+        # for char, result in inits.items():
+        await message.respond(f'{char} rolled {inits[char]}')
+
+    await opsdroid.memory.put('inititives', inits)
