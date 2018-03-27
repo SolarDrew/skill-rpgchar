@@ -76,32 +76,32 @@ async def get_character(name, opsdroid, config, message):
     # Remove burden of case-sensitivity from the user
     name = name.title()
 
-    # Ensure that a list of the PCs exists
-    pcs = await opsdroid.memory.get('pcs')
-    if not pcs:
-        pcs = {}
-        await opsdroid.memory.put('pcs', pcs)
+    # Ensure that a list of the characters exists
+    chars = await opsdroid.memory.get('chars')
+    if not chars:
+        chars = {}
+        await opsdroid.memory.put('chars', chars)
 
-    if name not in pcs.keys():
-        pcinfo = config['pcs'][name]
-        if isinstance(config['pcs'][name], str):
-            with open(pcinfo) as f:
-                pcinfo = yaml.safe_load(f)
-        charstats = pcinfo
+    if name not in chars.keys():
+        charinfo = config['chars'][name]
+        if isinstance(config['chars'][name], str):
+            with open(charinfo) as f:
+                charinfo = yaml.safe_load(f)
+        charstats = charinfo
         char = Character(**charstats)
         await put_character(char, opsdroid)
         await message.respond(f"Character {name} not in memory - loaded from config.")
         return char
 
-    charstats = pcs[name]
+    charstats = chars[name]
     return Character(**charstats)
 
 
 async def put_character(char, opsdroid):
     """Save a character into memory"""
-    pcs = await opsdroid.memory.get('pcs')
-    pcs[char.name.split()[0]] = char.__dict__
-    await opsdroid.memory.put('pcs', pcs)
+    chars = await opsdroid.memory.get('chars')
+    chars[char.name.split()[0]] = char.__dict__
+    await opsdroid.memory.put('chars', chars)
 
 
 @match_regex('who am I', case_sensitive=False)
@@ -210,8 +210,8 @@ async def long_rest(opsdroid, config, message):
     At the moment this consists solely of giving everyone their hit points back.
     """
 
-    pcs = await opsdroid.memory.get('pcs')
-    for charname in pcs.keys():
+    chars = await opsdroid.memory.get('chars')
+    for charname in chars.keys():
         if charname.lower() == '_id':
             continue
         char = await get_character(charname, opsdroid, config, message)
