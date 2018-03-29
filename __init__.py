@@ -11,7 +11,7 @@ from opsdroid.matchers import match_regex
 
 from .constants.regex_constants import *
 from .combat import attack
-from .characters import whoami, howami
+from .characters import whoami, howami, get_character, put_character
 
 
 def setup(opsdroid):
