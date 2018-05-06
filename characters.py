@@ -3,11 +3,13 @@ Docstring
 """
 
 import yaml
+import logging
 from opsdroid.matchers import match_regex
 
 from .constants.regex_constants import *
 
 
+# TODO come up with a subclass system for different character classes.
 class Character:
     def __init__(self, name, level, max_hp, race, class_, AC, abilities,
                  current_hp=None, weapons=None, unconscious=False,
