@@ -107,9 +107,13 @@ async def put_character(char, opsdroid):
 @match_regex('who am I', case_sensitive=False)
 async def whoami(opsdroid, config, message):
     """Basic reporting of character identity"""
-    char = await get_character(message.user, opsdroid, config, message)
 
-    await message.respond(f"You are {char}, a fearless adventurer!")
+    if message.user == config['game_master']:
+        await message.respond(f"You're the Game Master! You don't have a character, silly!")
+    else:
+        char = await get_character(message.user, opsdroid, config, message)
+
+        await message.respond(f"You are {char}, a fearless adventurer!")
 
 
 @match_regex(f"how ('?s|am|is) {SUBJECT}", case_sensitive=False)
@@ -133,6 +137,10 @@ async def howami(opsdroid, config, message):
     else:
         state_message = 'in mortal peril!'
 
-    await message.respond(f"{prefix} {state_message} ({char.current_hp}/{char.max_hp})")
+    msg_text =  f"{prefix} {state_message}"
+    # if room == DM-private:
+    #     msg_text += f"({char.current_hp}/{char.max_hp})"
+
+    await message.respond(msg_text)
 
 

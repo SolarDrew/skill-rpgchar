@@ -2,20 +2,17 @@
 Docstring
 """
 import logging
-import re
-from functools import partial
 
-from numpy.random import randint
-import yaml
 from opsdroid.matchers import match_regex
 
-from .constants.regex_constants import *
+# from .constants.regex_constants import *
 from .combat import attack
 from .characters import whoami, howami, get_character, put_character
+from .initiative import create_initiative
 
 
 def setup(opsdroid):
-    logging.debug("Loaded rpgchar module - ready to play Role-Playing Games!")
+    logging.info("Loaded rpgchar module - ready to play Role-Playing Games!")
 
 
 @match_regex(f'(you|we) (take|have) a long rest', case_sensitive=False)
