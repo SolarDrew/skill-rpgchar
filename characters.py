@@ -115,7 +115,7 @@ async def whoami(opsdroid, config, message):
 @match_regex(f"how ('?s|am|is) {SUBJECT}", case_sensitive=False)
 async def howami(opsdroid, config, message):
     """Basic reporting of characters' current health."""
-    name = message.regex.group('subname')
+    name = message.regex.group('subject')
     if name.upper() == 'I':
         name = message.user
         prefix = "You're"

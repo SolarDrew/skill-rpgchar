@@ -63,11 +63,11 @@ async def attack(opsdroid, config, message):
     match = message.regex.group
 
     # Get characters
-    atkr_name = match('obname')
+    atkr_name = match('object')
     if atkr_name.upper() == 'I':
         atkr_name = message.user
     attacker = await get_character(atkr_name, opsdroid, config, message)
-    def_name = match('subname')
+    def_name = match('subject')
     defender = await get_character(def_name, opsdroid, config, message)
     weapon = attacker.weapons[match('weapon')]
 
