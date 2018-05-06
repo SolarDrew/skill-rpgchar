@@ -74,12 +74,20 @@ async def get_character(name, opsdroid, config, message):
         chars = {}
         await opsdroid.memory.put('chars', chars)
 
+    logging.debug((name, chars.keys()))
     if name not in chars.keys():
-        charinfo = config['chars'][name]
-        if isinstance(config['chars'][name], str):
-            with open(charinfo) as f:
-                charinfo = yaml.safe_load(f)
-        charstats = charinfo
+        charstats = config['chars'][name]
+        if isinstance(charstats, str):
+            with open(charstats) as f:
+                charstats = yaml.safe_load(f)
+        elif 'loadfile' in charstats:
+            file_ = charstats.pop('loadfile')
+            with open(file_) as f:
+                defaults = yaml.safe_load(f)
+                defaults.update(charstats)
+                charstats = defaults
+            # defaults.update(charstats)
+        logging.debug(charstats)
         char = Character(**charstats)
         await put_character(char, opsdroid)
         await message.respond(f"Character {name} not in memory - loaded from config.")
