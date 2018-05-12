@@ -60,7 +60,8 @@ class Character:
     @property
     def proficiency(self):
         """Return the character's proficiency bonus as determined by level"""
-        return 2 # this obviously needs to change
+        proficiencies = [2, 3, 4, 5, 6]
+        return proficiencies[(self.level - 1) // 4]
 
 
 async def get_character(name, opsdroid, config, message):
