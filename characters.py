@@ -12,7 +12,7 @@ from .constants.regex_constants import *
 # TODO come up with a subclass system for different character classes.
 class Character:
     def __init__(self, name, level, max_hp, race, class_, AC, abilities,
-                 current_hp=None, weapons=None, unconscious=False,
+                 XP=0, current_hp=None, weapons=None, unconscious=False,
                  death_saves={'success': 0, 'fail': 0}):
         self.name = name
         self.level = level # Change this to XP and calculate level
@@ -22,6 +22,7 @@ class Character:
         self.AC = AC # Replace this with a property that calculates AC
         self.abilities = abilities
 
+        self.XP = XP
         if current_hp:
             self.current_hp = current_hp
         else:
