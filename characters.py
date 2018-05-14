@@ -82,7 +82,7 @@ async def get_character(name, opsdroid, config, message):
     if name not in chars.keys():
         if opsdroid.config.get('module-path', None):
             charstats = join(opsdroid.config['module-path'],
-                             'opsdroid-modules', 'skill', 'rpgchar',
+                             # 'opsdroid-modules', 'skill', 'rpgchar',
                              config['chars'][name])
         else:
             charstats = config['chars'][name]
