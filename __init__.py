@@ -40,4 +40,4 @@ async def tell_dm(opsdroid, config, message):
 
     text = message.text.lower().replace('tell the dm', f'{message.user} says:')
 
-    await message.respond(text, room='DM-private')
+    await message.respond(text, roomname='DM-private')
