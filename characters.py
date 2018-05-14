@@ -4,6 +4,8 @@ Docstring
 
 import yaml
 import logging
+from os.path import join
+
 from opsdroid.matchers import match_regex
 
 from .constants.regex_constants import *
@@ -78,7 +80,12 @@ async def get_character(name, opsdroid, config, message):
 
     logging.debug((name, chars.keys()))
     if name not in chars.keys():
-        charstats = config['chars'][name]
+        if opsdroid.config.get('module-path', None):
+            charstats = join(opsdroid.config['module-path'],
+                             'opsdroid-modules', 'skill', 'rpgchar',
+                             config['chars'][name])
+        else:
+            charstats = config['chars'][name]
         if isinstance(charstats, str):
             with open(charstats) as f:
                 charstats = yaml.safe_load(f)
