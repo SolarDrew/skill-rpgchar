@@ -3,7 +3,7 @@ Docstring
 """
 import re
 from functools import partial
-from numpy.random import randint
+from random import randint
 
 from opsdroid.matchers import match_regex
 

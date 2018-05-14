@@ -3,7 +3,7 @@ Docstring
 """
 from collections import OrderedDict
 
-from numpy.random import randint
+from random import randint
 from opsdroid.matchers import match_regex
 
 from .characters import get_character
