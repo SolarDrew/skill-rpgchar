@@ -22,7 +22,7 @@ async def long_rest(opsdroid, config, message):
     At the moment this consists solely of giving everyone their hit points back.
     """
 
-    chars = await opsdroid.memory.get('chars')
+    chars = await opsdroid.memory.get('chars', {})
     for charname in chars.keys():
         if charname.lower() == '_id':
             continue
