@@ -165,7 +165,7 @@ async def howami(opsdroid, config, message):
     await message.respond(msg_text)
 
 
-def grant_xp(charname, nXP, opsdroid, config, message):
+await def grant_xp(charname, nXP, opsdroid, config, message):
     char = await get_character(charname, opsdroid, config, message)
     levelup = char.gain_xp(match('nXP'))
     if levelup:
@@ -173,7 +173,7 @@ def grant_xp(charname, nXP, opsdroid, config, message):
 
 
 @match_regex(f'{OBJECT} {GAIN_VERB} (?P<nXP>\d+) XP', case_sensitive=False)
-async def grant_xp(opsdroid, config, message):
+async def parse_xp(opsdroid, config, message):
 
     match = message.regex.group
 
