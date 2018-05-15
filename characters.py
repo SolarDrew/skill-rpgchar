@@ -11,6 +11,11 @@ from opsdroid.matchers import match_regex
 from .constants.regex_constants import *
 
 
+level_XPs = [0, 300, 900, 2700, 6500,
+             14000, 23000, 34000, 48000, 64000,
+             85000, 100000, 120000, 140000, 165000,
+             195000, 225000, 265000, 305000, 355000]
+
 # TODO come up with a subclass system for different character classes.
 class Character:
     def __init__(self, name, level, max_hp, race, class_, AC, abilities,
