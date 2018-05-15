@@ -165,7 +165,7 @@ async def howami(opsdroid, config, message):
     await message.respond(msg_text)
 
 
-await def grant_xp(charname, nXP, opsdroid, config, message):
+async def grant_xp(charname, nXP, opsdroid, config, message):
     char = await get_character(charname, opsdroid, config, message)
     levelup = char.gain_xp(match('nXP'))
     if levelup:
