@@ -57,6 +57,13 @@ class Character:
         """Add health to the character up to their maximum hit points."""
         self.current_hp = min(self.max_hp, self.current_hp+nhealth)
 
+    def gain_xp(self, nXP):
+        self.XP += nXP
+        if self.XP >= level_XPs[self.level]:
+            self.level += 1
+            return True
+        return False
+
     def modifier(self, ability):
         """Return the modifier for a given ability"""
         return (self.abilities[ability]-10) // 2
