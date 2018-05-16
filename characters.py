@@ -5,6 +5,7 @@ Docstring
 import yaml
 import logging
 from os.path import join
+from random import randint
 
 from opsdroid.matchers import match_regex
 
@@ -77,6 +78,31 @@ class Character:
         """Return the character's proficiency bonus as determined by level"""
         proficiencies = [2, 3, 4, 5, 6]
         return proficiencies[(self.level - 1) // 4]
+
+    def ability_check(self, ability):
+        """Make a check for the specified ability and return the roll, modifier and total"""
+        base_roll = randint(1, 20)
+        check_roll = [base_roll, self.modifier(ability)]
+        check_total = sum(check_roll)
+
+        return check_total, check_roll
+
+    def skill_check(self, skill):
+        """Make a check for the specified skill and return the roll, modifier and total"""
+        # TODO No proficiency here, need to add that
+        # TODO Also replace this big ugly if block with a dictionary somewhere.
+        if skill.lower() == 'athletics':
+            ability = 'Str'
+        elif skill.lower() in ['acrobatics', 'sleight of hand', 'stealth']:
+            ability = 'Dex'
+        elif skill.lower() in ['arcana', 'history', 'investigation', 'nature', 'religion']:
+            ability = 'Int'
+        elif skill.lower() in ['animal handling', 'insight', 'medicine', 'perception', 'survival']:
+            ability = 'Wis'
+        elif skill.lower() in ['deception', 'intimidation', 'performance', 'persuasion']:
+            ability = 'Cha'
+
+        return self.ability_check(ability)
 
 
 async def get_character(name, opsdroid, config, message):
