@@ -41,7 +41,10 @@ async def create_initiative(opsdroid, config, message):
 async def get_initiatives(opsdroid):
     inits = await opsdroid.memory.get('initiatives')
     if inits:
-        inits.pop('_id')
+        try:
+            inits.pop('_id')
+        except KeyError:
+            pass
         # inits = OrderedDict(sorted(inits.items(), key=lambda t: t[1], reverse=True))
         inits = OrderedDict(inits)
 
