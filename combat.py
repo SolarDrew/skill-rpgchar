@@ -40,7 +40,7 @@ def weapon_attack(attacker, defender, weapon):
         ndice = ndice * 2 if base_roll == 20 else ndice
         dice = int(match.group('dice'))
 
-        rolls = list(map(partial(randint, 1), [dice+1]*ndice)) + [mod]
+        rolls = list(map(partial(randint, 1), [dice]*ndice)) + [mod]
         total_damage = sum(rolls)
 
         defender.take_damage(total_damage)
