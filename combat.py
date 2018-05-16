@@ -54,7 +54,7 @@ def weapon_attack(attacker, defender, weapon):
     return report, defender
 
 
-@match_regex(f'{OBJECT} {ATK_VERB} {SUBJECT} with (my|a) {WEAPON}', case_sensitive=False)
+@match_regex(f'{OBJECT} {ATK_VERB} {SUBJECT} with {POSSESSIVE} {WEAPON}', case_sensitive=False)
 async def attack(opsdroid, config, message):
     """
     Detect when a character is attacking another character.
