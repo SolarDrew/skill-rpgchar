@@ -226,7 +226,7 @@ async def make_check(opsdroid, config, message):
     skill = match('skill')
 
     char = await get_character(charname, opsdroid, config, message)
-    if skill in ['Str', 'Dex', 'Con', 'Int', 'Wis', 'Cha']:
+    if skill.lower() in ['str', 'dex', 'con', 'int', 'wis', 'cha']:
         total, rolls = char.ability_check(skill)
     else:
         total, rolls = char.skill_check(skill)
