@@ -219,7 +219,7 @@ async def parse_xp(opsdroid, config, message):
         grant_xp(charname, XP, opsdroid, config, message)
 
 
-@match_regex(f'{OBJECT},? makes? a (?P<skill>.*) check', case_sensitive=False)
+@match_regex(f'{OBJECT},? makes? a (?P<skill>\w+) check', case_sensitive=False)
 async def make_check(opsdroid, config, message):
     match = message.regex.group
     charname = match('object')
