@@ -232,3 +232,13 @@ async def make_check(opsdroid, config, message):
         total, rolls = char.skill_check(skill)
 
     await message.respond(f"{charname} gets {total} ({' + '.join(str(r) for r in rolls)})!")
+
+
+@match_regex(f'!setvalue {OBJECT} (?P<attribute>\w+) (?P<value>\d+)', case_sensitive=False)
+async def set_value(opsdroid, config, message):
+    match = message.regex.group
+    charname = match('object')
+
+    char = await get_character(charname, opsdroid, config, message)
+    char.set_attr(match('attribute'), match('value'))
+    await put_character(char, opsdroid)
