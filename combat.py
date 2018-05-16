@@ -10,6 +10,9 @@ from opsdroid.matchers import match_regex
 from .constants.regex_constants import *
 from .characters import get_character, put_character
 
+MELEE_WEAPONS = ['sword', 'dagger']
+RANGED_WEAPONS = ['bow', 'crossbow']
+
 
 def weapon_attack(attacker, defender, weapon):
     """
@@ -22,8 +25,11 @@ def weapon_attack(attacker, defender, weapon):
     hitmiss = 'misses'
 
     # Make attack roll
-    base_roll = randint(1, 21)
-    mod = attacker.modifier('Str')
+    base_roll = randint(1, 20)
+    if weapon in RANGED_WEAPONS:
+        mod = attacker.modifier('Dex')
+    else:
+        mod = attacker.modifier('Str')
     atk_roll = [base_roll, attacker.proficiency, mod]
     atk_total = sum(atk_roll)
     if atk_total >= defender.AC or base_roll == 20 and base_roll != 1:
