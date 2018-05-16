@@ -217,3 +217,18 @@ async def parse_xp(opsdroid, config, message):
     # Single character
     else:
         grant_xp(charname, XP, opsdroid, config, message)
+
+
+@match_regex(f'{OBJECT},? makes? a (?P<skill>.*) check', case_sensitive=False)
+async def make_check(opsdroid, config, message):
+    match = message.regex.group
+    charname = match('object')
+    skill = match('skill')
+
+    char = await get_character(charname, opsdroid, config, message)
+    if skill in ['Str', 'Dex', 'Con', 'Int', 'Wis', 'Cha']:
+        total, rolls = char.ability_check(skill)
+    else:
+        total, rolls = char.skill_check(skill)
+
+    await message.respond(f"{charname} gets {total} ({' + '.join(str(r) for r in rolls)})!")
