@@ -79,3 +79,65 @@ async def next_player(opsdroid, config, message):
     await opsdroid.memory.put('initiatives', inits)
 
     await message.respond(f"Next up is {nextup}")
+
+
+@match_regex(f'!init add (?P<name>\w+) (?P<initval>\d+)', case_sensitive=False)
+async def add_character(opsdroid, config, message):
+    match = message.regex.group
+    charname = match('name')
+    initval = int(match('initval'))
+    # Get current order from memory and determine current player
+    inits = await get_initiatives(opsdroid)
+    active_char = next(iter(inits))
+
+    # Add new character to order
+    newchar = await get_character(charname, opsdroid, config, message)
+    inits[newchar] = initval
+
+    # Resort to ensure correct relative ordering
+    inits = OrderedDict(sorted(inits.items(), key=lambda t: t[1], reverse=True))
+
+    # Re-rotate the order to bring the active player back to the top
+    top = next(iter(inits))
+    while top != active_char:
+        inits.move_to_end(top)
+        top = next(iter(inits))
+    await opsdroid.memory.put('initiatives', inits)
+
+
+@match_regex(f'!init event (single|recurring) (?P<initval>\d+) (?P<text>.*)', case_sensitive=False)
+async def add_event(opsdroid, config, message):
+    match = message.regex.group
+    event_text = match('text')
+    initval = match('initval')
+
+    # Get current order from memory and determine current player
+    inits = await get_initiatives(opsdroid)
+    active_char = next(iter(inits))
+
+    # Add event to order
+    inits[event_text] = initval
+
+    # Resort to ensure correct relative ordering
+    inits = OrderedDict(sorted(inits.items(), key=lambda t: t[1], reverse=True))
+
+    # Re-rotate the order to bring the active player back to the top
+    top = next(iter(inits))
+    while top != active_char:
+        inits.move_to_end(top)
+        top = next(iter(inits))
+    await opsdroid.memory.put('initiatives', inits)
+
+
+@match_regex(f'!init remove (?P<name>\w+)', case_sensitive=False)
+async def remove_item(opsdroid, config, message):
+    match = message.regex.group
+    name = match('name')
+
+    inits = await get_initiatives(opsdroid)
+    try:
+        inits.pop(name)
+    except KeyError:
+        for k in inits.keys():
+            if k.split()[0] == name:
+                inits.pop(k)
