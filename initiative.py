@@ -20,13 +20,13 @@ async def create_initiative(opsdroid, config, message):
         if charname.lower() == '_id':
             continue
         char = await get_character(charname, opsdroid, config, message)
-        inits[charname] = randint(1, 21) + char.modifier('Dex')
+        inits[charname] = randint(1, 20) + char.modifier('Dex')
 
     inits = OrderedDict(sorted(inits.items(), key=lambda t: t[1], reverse=True))
     # init_order = '\n'.join(
     #     [f'{char} rolled {inits[char]}' for char in inits]) #sorted(inits, key=inits.get, reverse=True)])
     await message.respond('\n'.join(
-        [f'{char} rolled {inits[char]}' for char in inits])) #init_order)
+        [f'{charname} rolled {inits[charname]}' for charname in inits])) #init_order)
 
     await opsdroid.memory.put('initiatives', inits)
     # await set_active_player()
