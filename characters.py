@@ -8,8 +8,10 @@ from os.path import join
 from random import randint
 
 from opsdroid.matchers import match_regex
+from opsdroid.message import Message
 
 from .constants.regex_constants import *
+from .initiative import remove_from_initiative
 
 
 level_XPs = [0, 300, 900, 2700, 6500,
@@ -43,7 +45,7 @@ class Character:
     def __repr__(self):
         return f"{self.name} ({self.race} {self.class_} {self.level})"
 
-    def take_damage(self, ndamage):
+    def take_damage(self, ndamage, opsdroid):
         """Handle removing of health from the character by e.g. a weapon attack."""
         # Damage happens
         self.current_hp -= ndamage
@@ -69,9 +71,12 @@ class Character:
         """Return the modifier for a given ability"""
         return (self.abilities[ability]-10) // 2
 
-    def die(self):
+    def die(self, opsdroid):
         """Remove the character from the game without pissing off the player"""
-        pass
+        await remove_from_initiative(self.name, opsdroid)
+        conn = opsdroid.connector
+        msg = Message("", None, conn.default_room, conn)
+        msg.respond(f"{self.name} died!")
 
     @property
     def proficiency(self):

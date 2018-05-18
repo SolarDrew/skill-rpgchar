@@ -14,7 +14,7 @@ MELEE_WEAPONS = ['sword', 'dagger']
 RANGED_WEAPONS = ['bow', 'crossbow']
 
 
-def weapon_attack(attacker, defender, weapon):
+def weapon_attack(attacker, defender, weapon, opsdroid):
     """
     Mechanical crunchy bits of actually making a weapon attack.
     Die rolls, damage, all that fun stuff
@@ -43,7 +43,7 @@ def weapon_attack(attacker, defender, weapon):
         rolls = list(map(partial(randint, 1), [dice]*ndice)) + [mod]
         total_damage = sum(rolls)
 
-        defender.take_damage(total_damage)
+        defender.take_damage(total_damage, opsdroid)
     else:
         total_damage = 0
     critmod = ' critically ' if base_roll in [1, 20] else ' '
@@ -77,7 +77,7 @@ async def attack(opsdroid, config, message):
     defender = await get_character(def_name, opsdroid, config, message)
     weapon = attacker.weapons[match('weapon')]
 
-    atk_report, defender = weapon_attack(attacker, defender, weapon)
+    atk_report, defender = weapon_attack(attacker, defender, weapon, opsdroid)
 
     await put_character(defender, opsdroid)
     for msg in atk_report:
