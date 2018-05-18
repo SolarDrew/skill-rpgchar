@@ -144,11 +144,12 @@ async def get_character(name, opsdroid, config, message):
     return Character(**charstats)
 
 
-@match_regex(f'!load (?P<name>\w+) (?P<file>.*).yaml', case_sensitive=False)
+@match_regex(f'!load (?P<name>\w+) (?P<file>.*)', case_sensitive=False)
 async def load_character(opsdroid, config, message):
     match = message.regex.group
     name = match('name')
     loadfile = match('file')
+    if not loadfile[-5:] == '.yaml': loadfile += '.yaml'
 
     # Remove burden of case-sensitivity from the user
     name = name.title()
