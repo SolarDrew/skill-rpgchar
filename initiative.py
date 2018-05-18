@@ -132,7 +132,7 @@ async def add_event(opsdroid, config, message):
 @match_regex(f'!init remove (?P<name>\w+)', case_sensitive=False)
 async def remove_item(opsdroid, config, message):
     match = message.regex.group
-    name = match('name')
+    name = match('name').title()
 
     await remove_from_initiative(name, opsdroid)
 
