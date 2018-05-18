@@ -51,10 +51,12 @@ class Character:
         self.current_hp -= ndamage
 
         # Need to handle cases in which damage causes unconsciousness or death
-        if self.current_hp <= self.max_hp / 2:
-            self.die()
-        elif self.current_hp < 0:
-            self.unconscious = True
+        # if self.current_hp <= self.max_hp / 2:
+        #     self.die(opsdroid)
+        # elif self.current_hp < 0:
+        #     self.unconscious = True
+        if self.current_hp < 0:
+            self.die(opsdroid)
 
     def heal(self, nhealth):
         """Add health to the character up to their maximum hit points."""
