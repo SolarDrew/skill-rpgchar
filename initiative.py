@@ -134,6 +134,10 @@ async def remove_item(opsdroid, config, message):
     match = message.regex.group
     name = match('name')
 
+    await remove_from_initiative(name, opsdroid)
+
+
+async def remove_from_initiative(name, opsdroid):
     inits = await get_initiatives(opsdroid)
     try:
         inits.pop(name)
@@ -141,3 +145,5 @@ async def remove_item(opsdroid, config, message):
         for k in inits.keys():
             if k.split()[0] == name:
                 inits.pop(k)
+
+    await opsdroid.memory.put('initiatives', inits)
