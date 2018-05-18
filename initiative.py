@@ -78,7 +78,7 @@ async def next_player(opsdroid, config, message):
 
     await opsdroid.memory.put('initiatives', inits)
 
-    await message.respond(f"Next up is {nextup}")
+    await message.respond(f"Next up: {nextup}")
 
 
 @match_regex(f'!init add (?P<name>\w+) (?P<initval>\d+)', case_sensitive=False)
@@ -105,7 +105,7 @@ async def add_character(opsdroid, config, message):
     await opsdroid.memory.put('initiatives', inits)
 
 
-@match_regex(f'!init event (single|recurring) (?P<initval>\d+) (?P<text>.*)', case_sensitive=False)
+@match_regex(f'!init event (?P<initval>\d+) (?P<text>.*)', case_sensitive=False)
 async def add_event(opsdroid, config, message):
     match = message.regex.group
     event_text = match('text')
