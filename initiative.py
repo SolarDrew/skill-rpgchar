@@ -39,7 +39,7 @@ async def create_initiative(opsdroid, config, message):
 
 
 async def get_initiatives(opsdroid):
-    inits = await opsdroid.memory.get('initiatives')
+    inits = await opsdroid.memory.get('initiatives', None)
     if inits:
         try:
             inits.pop('_id')
