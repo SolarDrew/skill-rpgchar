@@ -252,10 +252,10 @@ async def parse_xp(opsdroid, config, message):
 async def make_check(opsdroid, config, message):
     match = message.regex.group
     charname = match('object')
-    skill = match('skill')
+    skill = match('skill').title()
 
     char = await get_character(charname, opsdroid, config, message)
-    if skill.lower() in ['str', 'dex', 'con', 'int', 'wis', 'cha']:
+    if skill in ['Str', 'Dex', 'Con', 'Int', 'Wis', 'Cha']:
         total, rolls = char.ability_check(skill)
     else:
         total, rolls = char.skill_check(skill)
