@@ -11,7 +11,6 @@ from opsdroid.matchers import match_regex
 from opsdroid.message import Message
 
 from .constants.regex_constants import *
-from .initiative import remove_from_initiative
 
 
 level_XPs = [0, 300, 900, 2700, 6500,
@@ -75,6 +74,9 @@ class Character:
 
     async def die(self, opsdroid):
         """Remove the character from the game without pissing off the player"""
+        # Here because it's a circular import otherwise. Consider refactoring
+        from .initiative import remove_from_initiative
+
         await remove_from_initiative(self.name, opsdroid)
         conn = opsdroid.connector
         msg = Message("", None, conn.default_room, conn)
