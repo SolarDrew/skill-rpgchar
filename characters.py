@@ -144,6 +144,34 @@ async def get_character(name, opsdroid, config, message):
     return Character(**charstats)
 
 
+@match_regex(f'!load (?P<name>\w+) (?P<file>.*).yaml', case_sensitive=False)
+async def load_character(opsdroid, config, message):
+    match = message.regex.group
+    name = match('name')
+    loadfile = match('file')
+
+    # Remove burden of case-sensitivity from the user
+    name = name.title()
+
+    # Ensure that a list of the characters exists
+    chars = await opsdroid.memory.get('chars')
+    if not chars:
+        chars = {}
+        await opsdroid.memory.put('chars', chars)
+
+    logging.debug((name, chars.keys()))
+    if opsdroid.config.get('module-path', None):
+        loadfile = join(opsdroid.config['module-path'], loadfile)
+    with open(loadfile) as f:
+        charstats = yaml.safe_load(f)
+        charstats['name'] = name
+    logging.debug(charstats)
+    char = Character(**charstats)
+    await put_character(char, opsdroid)
+    await message.respond(f"Character loaded from config.")
+    return char
+
+
 async def put_character(char, opsdroid):
     """Save a character into memory"""
     chars = await opsdroid.memory.get('chars')
