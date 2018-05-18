@@ -84,7 +84,7 @@ async def next_player(opsdroid, config, message):
 @match_regex(f'!init add (?P<name>\w+) (?P<initval>\d+)', case_sensitive=False)
 async def add_character(opsdroid, config, message):
     match = message.regex.group
-    charname = match('name')
+    charname = match('name').title()
     initval = int(match('initval'))
     # Get current order from memory and determine current player
     inits = await get_initiatives(opsdroid)
