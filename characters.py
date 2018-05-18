@@ -215,7 +215,7 @@ async def howami(opsdroid, config, message):
 
     msg_text =  f"{prefix} {state_message}"
     # if room == DM-private:
-    #     msg_text += f"({char.current_hp}/{char.max_hp})"
+    msg_text += f"({char.current_hp}/{char.max_hp})"
 
     await message.respond(msg_text)
 
