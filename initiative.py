@@ -55,7 +55,7 @@ async def get_initiatives(opsdroid):
 async def report_order(opsdroid, config, message):
     inits = await get_initiatives(opsdroid)
     await message.respond('\n'.join(
-        [f'{charname} rolled {inits[charname]}' for charname in inits])) #init_order)
+        [f'{charname} ({inits[charname]})' for charname in inits])) #init_order)
 
 
 @match_regex("whose turn", case_sensitive=False)

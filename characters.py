@@ -158,7 +158,8 @@ async def load_character(opsdroid, config, message):
     match = message.regex.group
     name = match('name')
     loadfile = match('file')
-    if not loadfile[-5:] == '.yaml': loadfile += '.yaml'
+    if not loadfile[-5:] == '.yaml':
+        loadfile += '.yaml'
 
     # Remove burden of case-sensitivity from the user
     name = name.title()
