@@ -51,6 +51,13 @@ async def get_initiatives(opsdroid):
     return inits
 
 
+@match_regex("!init order")
+async def report_order(opsdroid, config, message):
+    inits = await get_initiatives(opsdroid)
+    await message.respond('\n'.join(
+        [f'{charname} rolled {inits[charname]}' for charname in inits])) #init_order)
+
+
 @match_regex("whose turn", case_sensitive=False)
 async def get_active_player(opsdroid, config, message):
     """Retreive the character of the player who's turn it is currently"""
