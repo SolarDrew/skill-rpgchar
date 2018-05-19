@@ -99,7 +99,7 @@ async def add_character(opsdroid, config, message):
 
     # Add new character to order
     newchar = await get_character(charname, opsdroid, config, message)
-    inits[newchar] = initval
+    inits[newchar.name] = initval
 
     # Resort to ensure correct relative ordering
     inits = OrderedDict(sorted(inits.items(), key=lambda t: t[1], reverse=True))
