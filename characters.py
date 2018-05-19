@@ -44,7 +44,7 @@ class Character:
     def __repr__(self):
         return f"{self.name} ({self.race} {self.class_} {self.level})"
 
-    async def take_damage(self, ndamage, opsdroid):
+    async def take_damage(self, ndamage, opsdroid, config, message):
         """Handle removing of health from the character by e.g. a weapon attack."""
         # Damage happens
         self.current_hp -= ndamage
@@ -55,7 +55,7 @@ class Character:
         # elif self.current_hp < 0:
         #     self.unconscious = True
         if self.current_hp < 0:
-            await self.die(opsdroid)
+            await self.die(opsdroid, config, message)
 
     def heal(self, nhealth):
         """Add health to the character up to their maximum hit points."""
@@ -72,15 +72,13 @@ class Character:
         """Return the modifier for a given ability"""
         return (self.abilities[ability]-10) // 2
 
-    async def die(self, opsdroid):
+    async def die(self, opsdroid, config, message):
         """Remove the character from the game without pissing off the player"""
         # Here because it's a circular import otherwise. Consider refactoring
         from .initiative import remove_from_initiative
 
         await remove_from_initiative(self.name, opsdroid)
-        conn = opsdroid.connector
-        msg = Message("", None, conn.default_room, conn)
-        msg.respond(f"{self.name} died!")
+        message.respond(f"{self.name} died!")
 
     @property
     def proficiency(self):
