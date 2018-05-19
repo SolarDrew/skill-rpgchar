@@ -78,7 +78,7 @@ class Character:
         from .initiative import remove_from_initiative
 
         await remove_from_initiative(self.name, opsdroid)
-        message.respond(f"{self.name} died!")
+        await message.respond(f"{self.name} died!")
 
     @property
     def proficiency(self):
