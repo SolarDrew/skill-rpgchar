@@ -9,7 +9,7 @@ from opsdroid.matchers import match_regex
 from .combat import attack
 from .characters import whoami, howami, get_character, put_character
 from .initiative import create_initiative
-from .picard import intent_self_in_room, get_matrix_connector
+from .picard import intent_self_in_room, get_matrix_connector, memory_in_room
 
 
 def setup(opsdroid):
@@ -39,13 +39,14 @@ async def long_rest(opsdroid, config, message):
     At the moment this consists solely of giving everyone their hit points back.
     """
 
-    chars = await opsdroid.memory.get('chars', {})
+    with memory_in_room(message.room, opsdroid):
+        chars = await opsdroid.memory.get('chars', {})
     for charname in chars.keys():
         if charname.lower() == '_id':
             continue
         char = await get_character(charname, opsdroid, config, message)
         char.current_hp = char.max_hp
-        await put_character(char, opsdroid)
+        await put_character(char, opsdroid, message.room)
 
 
 @match_regex('tell the dm', case_sensitive=False)

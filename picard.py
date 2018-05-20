@@ -1,7 +1,7 @@
 import logging
+from contextlib import contextmanager
 
 import aiohttp
-
 from matrix_client.errors import MatrixRequestError
 
 _LOGGER = logging.getLogger(__name__)
@@ -233,3 +233,10 @@ async def set_room_avatar(opsdroid, room_id, avatar_url):
     return await connector.connection.send_state_event(room_id,
                                                        "m.room.avatar",
                                                        content)
+
+
+@contextmanager
+def memory_in_room(room, opsdroid):
+    opsdroid.memory.databases[0].room = room
+    yield opsdroid
+    opsdroid.memory.databases[0].room = opsdroid.default_connector.default_room

@@ -11,6 +11,7 @@ from opsdroid.matchers import match_regex
 from opsdroid.message import Message
 
 from .constants.regex_constants import *
+from .picard import memory_in_room
 
 
 level_XPs = [0, 300, 900, 2700, 6500,
@@ -118,10 +119,11 @@ async def get_character(name, opsdroid, config, message):
     name = name.title()
 
     # Ensure that a list of the characters exists
-    chars = await opsdroid.memory.get('chars')
-    if not chars:
-        chars = {}
-        await opsdroid.memory.put('chars', chars)
+    with memory_in_room(message.room, opsdroid):
+        chars = await opsdroid.memory.get('chars')
+        if not chars:
+            chars = {}
+            await opsdroid.memory.put('chars', chars)
 
     logging.debug((name, chars.keys()))
     if name not in chars.keys():
@@ -143,7 +145,7 @@ async def get_character(name, opsdroid, config, message):
             # defaults.update(charstats)
         logging.debug(charstats)
         char = Character(**charstats)
-        await put_character(char, opsdroid)
+        await put_character(char, opsdroid, message.room)
         await message.respond(f"Character {name} not in memory - loaded from config.")
         return char
 
@@ -163,10 +165,11 @@ async def load_character(opsdroid, config, message):
     name = name.title()
 
     # Ensure that a list of the characters exists
-    chars = await opsdroid.memory.get('chars')
-    if not chars:
-        chars = {}
-        await opsdroid.memory.put('chars', chars)
+    with memory_in_room(message.room, opsdroid):
+        chars = await opsdroid.memory.get('chars')
+        if not chars:
+            chars = {}
+            await opsdroid.memory.put('chars', chars)
 
     logging.debug((name, chars.keys()))
     if opsdroid.config.get('module-path', None):
@@ -176,16 +179,17 @@ async def load_character(opsdroid, config, message):
         charstats['name'] = name
     logging.debug(charstats)
     char = Character(**charstats)
-    await put_character(char, opsdroid)
+    await put_character(char, opsdroid, message.room)
     await message.respond(f"Character loaded from config.")
     return char
 
 
-async def put_character(char, opsdroid):
+async def put_character(char, opsdroid, room):
     """Save a character into memory"""
-    chars = await opsdroid.memory.get('chars')
-    chars[char.name.split()[0]] = char.__dict__
-    await opsdroid.memory.put('chars', chars)
+    with memory_in_room(room, opsdroid):
+        chars = await opsdroid.memory.get('chars')
+        chars[char.name.split()[0]] = char.__dict__
+        await opsdroid.memory.put('chars', chars)
 
 
 @match_regex('who am I', case_sensitive=False)
@@ -246,7 +250,8 @@ async def parse_xp(opsdroid, config, message):
 
     # Handle granting XP to the whole group
     if charname.lower() in ['everyone', 'you all', 'the party', 'the group']:
-        chars = await opsdroid.memory.get('chars', {})
+        with memory_in_room(message.room, opsdroid):
+            chars = await opsdroid.memory.get('chars', {})
         for charname in chars.keys():
             if charname.lower() == '_id':
                 continue
@@ -278,4 +283,4 @@ async def set_value(opsdroid, config, message):
 
     char = await get_character(charname, opsdroid, config, message)
     char.set_attr(match('attribute'), match('value'))
-    await put_character(char, opsdroid)
+    await put_character(char, opsdroid, message.room)
