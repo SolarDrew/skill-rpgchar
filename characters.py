@@ -253,8 +253,6 @@ async def parse_xp(opsdroid, config, message):
         with memory_in_room(message.room, opsdroid):
             chars = await opsdroid.memory.get('chars', {})
         for charname in chars.keys():
-            if charname.lower() == '_id':
-                continue
             grant_xp(charname, XP, opsdroid, config, message)
     # Single character
     else:

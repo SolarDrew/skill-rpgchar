@@ -1,6 +1,7 @@
 """
 Docstring
 """
+import logging
 from collections import OrderedDict
 
 from random import randint
@@ -44,13 +45,8 @@ async def get_initiatives(opsdroid, room):
     with memory_in_room(room, opsdroid):
         inits = await opsdroid.memory.get('initiatives')
     if inits:
-        try:
-            inits.pop('_id')
-        except KeyError:
-            pass
         # inits = OrderedDict(sorted(inits.items(), key=lambda t: t[1], reverse=True))
         inits = OrderedDict(inits)
-
     return inits
 
 
