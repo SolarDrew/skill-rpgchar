@@ -18,19 +18,25 @@ def setup(opsdroid):
 
 @match_regex("!loadrooms")
 async def ensure_rooms_presence(opsdroid, config, message):
+    logging.debug(config)
     room_id = await intent_self_in_room(opsdroid, config['room'])
+    logging.debug(room_id)
 
     conn = get_matrix_connector(opsdroid)
-    if not room_id in conn.room_ids.vales():
-        # Determine the name to store the room as in the connector
-        roomname = config['name'].replace('-rpgchar', '')
+    # if not room_id in conn.room_ids.values():
+    # Determine the name to store the room as in the connector
+    roomname = config['name'].replace('-rpgchar', '')
+    logging.debug(f'{config["name"]}, {roomname}')
 
-        # Refresh the filter with new room info so the bot can get message from the room
-        conn.rooms[roomname] = config['room']
-        conn.room_ids[roomname] = room_id
-        conn.filter_id = await conn.make_filter(conn.connection, conn.room_ids.values())
+    # Refresh the filter with new room info so the bot can get message from the room
+    # roomname = 'dungeon-chat'
+    conn.rooms[roomname] = config['room']
+    logging.debug(conn.rooms)
+    conn.room_ids[roomname] = room_id
+    logging.debug(conn.room_ids)
+    conn.filter_id = await conn.make_filter(conn.connection, conn.room_ids.values())
 
-        await message.respond(f"Joined room {room_id}", room="main")
+    await message.respond(f"Joined room {room_id}", room="main")
 
 @match_regex(f'(you|we) (take|have) a long rest', case_sensitive=False)
 async def long_rest(opsdroid, config, message):
