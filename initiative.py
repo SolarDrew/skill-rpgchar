@@ -56,10 +56,12 @@ async def get_initiatives(opsdroid, room):
 
 @match_regex("!init order")
 async def report_order(opsdroid, config, message):
-    inits = await get_initiatives(opsdroid)
-    await message.respond('\n'.join(
-        [f'{charname} ({inits[charname]})' for charname in inits])) #init_order)
-
+    inits = await get_initiatives(opsdroid, message.room)
+    if inits:
+        await message.respond('\n'.join(
+            [f'{charname} ({inits[charname]})' for charname in inits])) #init_order)
+    else:
+        await message.respond("Looks like there isn't an initiative order yet!")
 
 @match_regex("whose turn", case_sensitive=False)
 async def get_active_player(opsdroid, config, message):
