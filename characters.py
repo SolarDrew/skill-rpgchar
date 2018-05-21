@@ -78,14 +78,14 @@ class Character:
         # Here because it's a circular import otherwise. Consider refactoring
         from .initiative import remove_from_initiative
 
-        await remove_from_initiative(self.name, opsdroid)
+        await remove_from_initiative(self.name, opsdroid, message.room)
         await message.respond(f"{self.name} died!")
 
     @property
     def proficiency(self):
         """Return the character's proficiency bonus as determined by level"""
         proficiencies = [2, 3, 4, 5, 6]
-        return proficiencies[(self.level - 1) // 4]
+        return proficiencies[(int(self.level) - 1) // 4]
 
     def ability_check(self, ability):
         """Make a check for the specified ability and return the roll, modifier and total"""

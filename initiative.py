@@ -31,6 +31,7 @@ async def create_initiative(opsdroid, config, message):
         [f'{charname} rolled {inits[charname]}' for charname in inits])) #init_order)
 
     with memory_in_room(message.room, opsdroid):
+        await opsdroid.memory.put('active_player', {'name': next(iter(inits))})
         await opsdroid.memory.put('initiatives', inits)
     # await set_active_player()
 
@@ -44,9 +45,16 @@ async def create_initiative(opsdroid, config, message):
 async def get_initiatives(opsdroid, room):
     with memory_in_room(room, opsdroid):
         inits = await opsdroid.memory.get('initiatives')
+        active_player = await opsdroid.memory.get('active_player')
+        active_player = active_player['name']
     if inits:
-        # inits = OrderedDict(sorted(inits.items(), key=lambda t: t[1], reverse=True))
-        inits = OrderedDict(inits)
+        inits = OrderedDict(sorted(inits.items(), key=lambda t: t[1], reverse=True))
+        # inits = OrderedDict(inits)
+        # Re-rotate the order to bring the active player back to the top
+        top = next(iter(inits))
+        while top != active_player:
+            inits.move_to_end(top)
+            top = next(iter(inits))
     return inits
 
 
@@ -85,6 +93,7 @@ async def next_player(opsdroid, config, message):
     nextup = next(iter(inits))
 
     with memory_in_room(message.room, opsdroid):
+        await opsdroid.memory.put('active_player', {'name': nextup})
         await opsdroid.memory.put('initiatives', inits)
 
     await message.respond(f"Next up: {nextup}")
@@ -145,11 +154,12 @@ async def remove_item(opsdroid, config, message):
     match = message.regex.group
     name = match('name').title()
 
-    await remove_from_initiative(name, opsdroid)
+    await remove_from_initiative(name, opsdroid, message.room)
 
 
-async def remove_from_initiative(name, opsdroid, message):
-    inits = await get_initiatives(opsdroid, message.room)
+async def remove_from_initiative(name, opsdroid, room):
+    with memory_in_room(room, opsdroid):
+        inits = await get_initiatives(opsdroid, room)
     try:
         inits.pop(name)
     except KeyError:
@@ -157,5 +167,5 @@ async def remove_from_initiative(name, opsdroid, message):
             if k.split()[0] == name:
                 inits.pop(k)
 
-    with memory_in_room(message.room, opsdroid):
+    with memory_in_room(room, opsdroid):
         await opsdroid.memory.put('initiatives', inits)

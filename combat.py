@@ -79,6 +79,6 @@ async def attack(opsdroid, config, message):
 
     atk_report, defender = await weapon_attack(attacker, defender, weapon, opsdroid, config, message)
 
-    await put_character(defender, opsdroid)
+    await put_character(defender, opsdroid, message.room)
     for msg in atk_report:
         await message.respond(msg)
