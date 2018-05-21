@@ -235,6 +235,28 @@ async def set_room_avatar(opsdroid, room_id, avatar_url):
                                                        content)
 
 
+async def load_from_memory(opsdroid, room, key, default={}):
+    with memory_in_room(room, opsdroid):
+        data = await opsdroid.memory.get(key)
+        if not data:
+            data = {}
+    return data
+
+
+async def save_new_to_memory(opsdroid, room, key, data):
+    with memory_in_room(room, opsdroid):
+        await opsdroid.memory.put(key, data)
+
+
+async def update_memory(opsdroid, room, key, data):
+    with memory_in_room(room, opsdroid):
+        olddata = await opsdroid.memory.get(key)
+        if olddata:
+            olddata.update(data)
+            data = olddata
+        await opsdroid.memory.put(key, data)
+
+
 @contextmanager
 def memory_in_room(room, opsdroid):
     opsdroid.memory.databases[0].room = room
