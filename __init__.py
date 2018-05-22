@@ -7,9 +7,9 @@ from opsdroid.matchers import match_regex
 
 # from .constants.regex_constants import *
 from .combat import attack
-from .characters import whoami, howami, get_character, put_character
+from .characters import whoami, howami, Character #get_character, put_character
 from .initiative import create_initiative
-from .picard import intent_self_in_room, get_matrix_connector, memory_in_room
+from .picard import intent_self_in_room, get_matrix_connector, load_from_memory, update_memory
 
 
 def setup(opsdroid):
@@ -45,14 +45,17 @@ async def long_rest(opsdroid, config, message):
     At the moment this consists solely of giving everyone their hit points back.
     """
 
-    with memory_in_room(message.room, opsdroid):
-        chars = await opsdroid.memory.get('chars', {})
+    # with memory_in_room(message.room, opsdroid):
+    #     chars = await opsdroid.memory.get('chars', {})
+    chars = load_from_memory(opsdroid, message.room, 'chars')
     for charname in chars.keys():
-        if charname.lower() == '_id':
-            continue
-        char = await get_character(charname, opsdroid, config, message)
-        char.current_hp = char.max_hp
-        await put_character(char, opsdroid, message.room)
+        # if charname.lower() == '_id':
+        #     continue
+        # char = await get_character(charname, opsdroid, config, message)
+        # char = Character(**chars[charname])
+        chars[charname]['current_hp'] = char[charname]['max_hp']
+        # await put_character(char, opsdroid, message.room)
+        await update_memory(opsdroid, message.room, 'chars', chars)
 
 
 @match_regex('tell the dm', case_sensitive=False)

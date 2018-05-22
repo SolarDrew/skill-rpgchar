@@ -8,7 +8,7 @@ from random import randint
 from opsdroid.matchers import match_regex
 
 from .characters import get_character
-from .picard import memory_in_room
+from .picard import load_from_memory, save_new_to_memory, update_memory #memory_in_room
 
 @match_regex('roll initiative', case_sensitive=False)
 async def create_initiative(opsdroid, config, message):
@@ -16,12 +16,14 @@ async def create_initiative(opsdroid, config, message):
     Roll initiative for everyone in the list of characters and store a list of those rolls.
     """
 
-    chars = config['chars'].keys()
+    # chars = config['chars'].keys()
+    chars = await load_from_memory(opsdroid, message.room, 'chars')
     inits = {} #OrderedDict()
     for charname in chars:
-        if charname.lower() == '_id':
-            continue
+        # if charname.lower() == '_id':
+        #     continue
         char = await get_character(charname, opsdroid, config, message)
+        # TODO replace this with a character method to allow for custon initiative modifiers
         inits[charname] = randint(1, 20) + char.modifier('Dex')
 
     inits = OrderedDict(sorted(inits.items(), key=lambda t: t[1], reverse=True))
@@ -30,9 +32,11 @@ async def create_initiative(opsdroid, config, message):
     await message.respond('\n'.join(
         [f'{charname} rolled {inits[charname]}' for charname in inits])) #init_order)
 
-    with memory_in_room(message.room, opsdroid):
-        await opsdroid.memory.put('active_player', {'name': next(iter(inits))})
-        await opsdroid.memory.put('initiatives', inits)
+    # with memory_in_room(message.room, opsdroid):
+    #     await opsdroid.memory.put('active_player', {'name': next(iter(inits))})
+    #     await opsdroid.memory.put('initiatives', inits)
+    await save_new_to_memory(opsdroid, message.room, 'initiatives', inits)
+    await update_memory(opsdroid, message.room, 'active_player', {'name': next(iter(inits))})
     # await set_active_player()
 
 
@@ -43,10 +47,13 @@ async def create_initiative(opsdroid, config, message):
 
 
 async def get_initiatives(opsdroid, room):
-    with memory_in_room(room, opsdroid):
-        inits = await opsdroid.memory.get('initiatives')
-        active_player = await opsdroid.memory.get('active_player')
-        active_player = active_player['name']
+    # with memory_in_room(room, opsdroid):
+    #     inits = await opsdroid.memory.get('initiatives')
+    #     active_player = await opsdroid.memory.get('active_player')
+    #     active_player = active_player['name']
+    inits = await load_from_memory(opsdroid, room, 'initiatives')
+    active_player = await load_from_memory(opsdroid, room, 'active_player')
+    active_player = active_player['name']
     if inits:
         inits = OrderedDict(sorted(inits.items(), key=lambda t: t[1], reverse=True))
         # inits = OrderedDict(inits)
@@ -92,9 +99,11 @@ async def next_player(opsdroid, config, message):
     inits.move_to_end(current)
     nextup = next(iter(inits))
 
-    with memory_in_room(message.room, opsdroid):
-        await opsdroid.memory.put('active_player', {'name': nextup})
-        await opsdroid.memory.put('initiatives', inits)
+    # with memory_in_room(message.room, opsdroid):
+    #     await opsdroid.memory.put('active_player', {'name': nextup})
+    #     await opsdroid.memory.put('initiatives', inits)
+    await save_new_to_memory(opsdroid, message.room, 'initiatives', inits)
+    await update_memory(opsdroid, message.room, 'active_player', {'name': nextup})
 
     await message.respond(f"Next up: {nextup}")
 
@@ -120,8 +129,9 @@ async def add_character(opsdroid, config, message):
     while top != active_char:
         inits.move_to_end(top)
         top = next(iter(inits))
-    with memory_in_room(message.room, opsdroid):
-        await opsdroid.memory.put('initiatives', inits)
+    # with memory_in_room(message.room, opsdroid):
+    #     await opsdroid.memory.put('initiatives', inits)
+    await save_new_to_memory(opsdroid, message.room, 'initiatives', inits)
 
 
 @match_regex(f'!init event (?P<initval>\d+) (?P<text>.*)', case_sensitive=False)
@@ -145,8 +155,9 @@ async def add_event(opsdroid, config, message):
     while top != active_char:
         inits.move_to_end(top)
         top = next(iter(inits))
-    with memory_in_room(message.room, opsdroid):
-        await opsdroid.memory.put('initiatives', inits)
+    # with memory_in_room(message.room, opsdroid):
+    #     await opsdroid.memory.put('initiatives', inits)
+    await save_new_to_memory(opsdroid, message.room, 'initiatives', inits)
 
 
 @match_regex(f'!init remove (?P<name>\w+)', case_sensitive=False)
@@ -158,8 +169,9 @@ async def remove_item(opsdroid, config, message):
 
 
 async def remove_from_initiative(name, opsdroid, room):
-    with memory_in_room(room, opsdroid):
-        inits = await get_initiatives(opsdroid, room)
+    # with memory_in_room(room, opsdroid):
+    #     inits = await get_initiatives(opsdroid, room)
+    inits = await load_from_memory(opsdroid, room, 'initiatives')
     try:
         inits.pop(name)
     except KeyError:
@@ -167,5 +179,6 @@ async def remove_from_initiative(name, opsdroid, room):
             if k.split()[0] == name:
                 inits.pop(k)
 
-    with memory_in_room(room, opsdroid):
-        await opsdroid.memory.put('initiatives', inits)
+    # with memory_in_room(room, opsdroid):
+    #     await opsdroid.memory.put('initiatives', inits)
+    await save_new_to_memory(opsdroid, room, 'initiatives', inits)

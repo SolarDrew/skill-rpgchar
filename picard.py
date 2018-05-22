@@ -239,7 +239,7 @@ async def load_from_memory(opsdroid, room, key, default={}):
     with memory_in_room(room, opsdroid):
         data = await opsdroid.memory.get(key)
         if not data:
-            data = {}
+            data = default
     return data
 
 
