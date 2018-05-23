@@ -99,13 +99,14 @@ async def next_player(opsdroid, config, message):
     inits.move_to_end(current)
     nextup = next(iter(inits))
 
-    # with memory_in_room(message.room, opsdroid):
-    #     await opsdroid.memory.put('active_player', {'name': nextup})
-    #     await opsdroid.memory.put('initiatives', inits)
     await save_new_to_memory(opsdroid, message.room, 'initiatives', inits)
     await update_memory(opsdroid, message.room, 'active_player', {'name': nextup})
 
-    await message.respond(f"Next up: {nextup}")
+    events = await load_from_memory(opsdroid, message.room, 'events')
+    if nextup in events.keys():
+        await message.respond(f"{events[nextup]}")
+    else:
+        await message.respond(f"Next up: {nextup}")
 
 
 @match_regex(f'!init add (?P<name>\w+) (?P<initval>\d+)', case_sensitive=False)
@@ -134,30 +135,23 @@ async def add_character(opsdroid, config, message):
     await save_new_to_memory(opsdroid, message.room, 'initiatives', inits)
 
 
-@match_regex(f'!init event (?P<initval>\d+) (?P<text>.*)', case_sensitive=False)
+@match_regex(f'!init event (?P<initval>\d+) (?P<name>\w+) (?P<text>.*)', case_sensitive=False)
 async def add_event(opsdroid, config, message):
     match = message.regex.group
+    event_name = match('name')
     event_text = match('text')
     initval = match('initval')
 
-    # Get current order from memory and determine current player
-    inits = await get_initiatives(opsdroid, message.room)
-    active_char = next(iter(inits))
-
     # Add event to order
-    inits[event_text] = initval
+    inits = await get_initiatives(opsdroid, message.room)
+    inits[event_name] = int(initval)
 
-    # Resort to ensure correct relative ordering
-    inits = OrderedDict(sorted(inits.items(), key=lambda t: t[1], reverse=True))
+    # Add to events description
+    events = await load_from_memory(opsdroid, message.room, 'events')
+    events[event_name] = event_text
 
-    # Re-rotate the order to bring the active player back to the top
-    top = next(iter(inits))
-    while top != active_char:
-        inits.move_to_end(top)
-        top = next(iter(inits))
-    # with memory_in_room(message.room, opsdroid):
-    #     await opsdroid.memory.put('initiatives', inits)
     await save_new_to_memory(opsdroid, message.room, 'initiatives', inits)
+    await save_new_to_memory(opsdroid, message.room, 'events', events)
 
 
 @match_regex(f'!init remove (?P<name>\w+)', case_sensitive=False)
@@ -178,6 +172,7 @@ async def remove_from_initiative(name, opsdroid, room):
         for k in inits.keys():
             if k.split()[0] == name:
                 inits.pop(k)
+                break
 
     # with memory_in_room(room, opsdroid):
     #     await opsdroid.memory.put('initiatives', inits)
