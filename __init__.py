@@ -47,15 +47,16 @@ async def long_rest(opsdroid, config, message):
 
     # with memory_in_room(message.room, opsdroid):
     #     chars = await opsdroid.memory.get('chars', {})
-    chars = load_from_memory(opsdroid, message.room, 'chars')
+    chars = await load_from_memory(opsdroid, message.room, 'chars')
     for charname in chars.keys():
         # if charname.lower() == '_id':
         #     continue
         # char = await get_character(charname, opsdroid, config, message)
         # char = Character(**chars[charname])
-        chars[charname]['current_hp'] = char[charname]['max_hp']
+        chars[charname]['current_hp'] = chars[charname]['max_hp']
         # await put_character(char, opsdroid, message.room)
-        await update_memory(opsdroid, message.room, 'chars', chars)
+    await update_memory(opsdroid, message.room, 'chars', chars)
+    await messge.respond("Everyone is restored to full health.")
 
 
 @match_regex('tell the dm', case_sensitive=False)
