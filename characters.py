@@ -57,6 +57,8 @@ class Character:
         #     self.unconscious = True
         if self.current_hp < 0:
             await self.die(opsdroid, config, message)
+        else:
+            await put_character(self, opsdroid, message.room)
 
     def heal(self, nhealth):
         """Add health to the character up to their maximum hit points."""
@@ -312,5 +314,5 @@ async def set_value(opsdroid, config, message):
     charname = match('object')
 
     char = await get_character(charname, opsdroid, config, message)
-    char.set_attr(match('attribute'), match('value'))
+    setattr(char, match('attribute'), int(match('value')))
     await put_character(char, opsdroid, message.room)
