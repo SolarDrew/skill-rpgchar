@@ -37,13 +37,11 @@ async def long_rest(opsdroid, config, message):
     await messge.respond("Everyone is restored to full health.")
 
 
-@match_regex('tell the dm', case_sensitive=False)
-async def tell_dm(opsdroid, config, message):
+@match_regex('!toroom (?P<roomname>\w+) (?P<msg>.*)', case_sensitive=False)
+async def to_room(opsdroid, config, message):
     """
-    Relay a message to the private chat with the DM.
-    Entirely for testing purposes at this point.
+    Relay a message to a specified room, as named in the config.
     """
+    match = message.regex.group
 
-    text = message.text.lower().replace('tell the dm', f'{message.user} says:')
-
-    await message.respond(text, room='DM-private')
+    await message.respond(match('msg'), room=match('roomname'))
