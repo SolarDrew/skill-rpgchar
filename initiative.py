@@ -45,9 +45,9 @@ async def get_initiatives(opsdroid, room):
     return inits
 
 
-@match_regex("!init order( !mem-from (?P<fromroom>\w+))?")
+@match_regex("!init order( !usemem (?P<memroom>\w+))?")
 async def report_order(opsdroid, config, message):
-    room  = message.regex.group('fromroom')
+    room  = message.regex.group('memroom')
     if not room:
         room = message.room
     inits = await get_initiatives(opsdroid, room)
@@ -92,7 +92,7 @@ async def next_player(opsdroid, config, message):
         await message.respond(f"Next up: {nextup}")
 
 
-@match_regex(f'!init add (?P<name>\w+) (?P<initval>\d+)( !mem-in (?P<memroom>))', case_sensitive=False)
+@match_regex(f'!init add (?P<name>\w+) (?P<initval>\d+)( !usemem (?P<memroom>\w+))?', case_sensitive=False)
 async def add_character(opsdroid, config, message):
     match = message.regex.group
     charname = match('name').title()
@@ -109,31 +109,36 @@ async def add_character(opsdroid, config, message):
     await save_new_to_memory(opsdroid, room, 'initiatives', inits)
 
 
-@match_regex(f'!init event (?P<initval>\d+) (?P<name>\w+) (?P<text>.*)', case_sensitive=False)
+@match_regex(f'!init event (?P<initval>\d+) (?P<name>\w+) (?P<text>.*)( !usemem (?P<memroom>\w+)$)?',
+             case_sensitive=False)
 async def add_event(opsdroid, config, message):
     match = message.regex.group
     event_name = match('name')
     event_text = match('text')
     initval = match('initval')
+    room = match('memroom')
+    room = room if room else message.room
 
     # Add event to order
-    inits = await get_initiatives(opsdroid, message.room)
+    inits = await get_initiatives(opsdroid, room)
     inits[event_name] = int(initval)
 
     # Add to events description
-    events = await load_from_memory(opsdroid, message.room, 'events')
+    events = await load_from_memory(opsdroid, room, 'events')
     events[event_name] = event_text
 
-    await save_new_to_memory(opsdroid, message.room, 'initiatives', inits)
-    await save_new_to_memory(opsdroid, message.room, 'events', events)
+    await save_new_to_memory(opsdroid, room, 'initiatives', inits)
+    await save_new_to_memory(opsdroid, room, 'events', events)
 
 
-@match_regex(f'!init remove (?P<name>\w+)', case_sensitive=False)
+@match_regex(f'!init remove (?P<name>\w+)( !usemem (?P<memroom>\w+))?', case_sensitive=False)
 async def remove_item(opsdroid, config, message):
     match = message.regex.group
     name = match('name').title()
+    room = match('memroom')
+    room = room if room else message.room
 
-    await remove_from_initiative(name, opsdroid, message.room)
+    await remove_from_initiative(name, opsdroid, room)
 
 
 async def remove_from_initiative(name, opsdroid, room):
