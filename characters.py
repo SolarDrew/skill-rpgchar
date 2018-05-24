@@ -220,7 +220,7 @@ async def whoami(opsdroid, config, message):
         await message.respond(f"You are {char}, a fearless adventurer!")
 
 
-@match_regex(f"how ('?s|am|is) {SUBJECT}", case_sensitive=False)
+@match_regex(f"how( '?s|am|is) {SUBJECT}( !usemem (?P<memroom>\w+))?", case_sensitive=False)
 async def howami(opsdroid, config, message):
     """Basic reporting of characters' current health."""
     name = message.regex.group('subject')
@@ -229,6 +229,9 @@ async def howami(opsdroid, config, message):
         prefix = "You're"
     else:
         prefix = "They're"
+    room = match('memroom')
+    room = room if room else message.room
+
     char = await get_character(name, opsdroid, config, message)
 
     state = char.current_hp / char.max_hp
@@ -241,9 +244,9 @@ async def howami(opsdroid, config, message):
     else:
         state_message = 'in mortal peril!'
 
-    msg_text =  f"{prefix} {state_message} ({char.current_hp}/{char.max_hp})"
-    # if room == DM-private:
-    #     msg_text += f"({char.current_hp}/{char.max_hp})"
+    msg_text =  f"{prefix} {state_message}" # ({char.current_hp}/{char.max_hp})"
+    if message.room == DM-private or name.upper == 'I' or name in config['chars'].keys():
+        msg_text += f"({char.current_hp}/{char.max_hp})"
 
     await message.respond(msg_text)
 
