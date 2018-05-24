@@ -118,10 +118,12 @@ class Character:
         return self.ability_check(ability)
 
 
-async def get_character(name, opsdroid, config, message):
+async def get_character(name, opsdroid, config, message, room=None):
 
     # Remove burden of case-sensitivity from the user
     name = name.title()
+
+    room = room if room else message.room
 
     # Ensure that a list of the characters exists
     # with memory_in_room(message.room, opsdroid):
@@ -129,7 +131,7 @@ async def get_character(name, opsdroid, config, message):
     #     if not chars:
     #         chars = {}
     #         await opsdroid.memory.put('chars', chars)
-    chars = await load_from_memory(opsdroid, message.room, 'chars')
+    chars = await load_from_memory(opsdroid, room, 'chars')
 
     logging.debug((name, chars.keys()))
     if name not in chars.keys():
@@ -151,7 +153,7 @@ async def get_character(name, opsdroid, config, message):
             # defaults.update(charstats)
         logging.debug(charstats)
         char = Character(**charstats)
-        await put_character(char, opsdroid, message.room, chars)
+        await put_character(char, opsdroid, room, chars)
         # chars[char.name.split()[0]] = char.__dict__
         # await update_memory(opsdroid, message.room, 'chars', chars)
         await message.respond(f"Character {name} not in memory - loaded from config.")

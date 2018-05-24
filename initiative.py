@@ -65,9 +65,12 @@ async def get_initiatives(opsdroid, room):
     return inits
 
 
-@match_regex("!init order")
+@match_regex("!init order( !mem-from (?P<fromroom>\w+))?")
 async def report_order(opsdroid, config, message):
-    inits = await get_initiatives(opsdroid, message.room)
+    room  = message.regex.group('fromroom')
+    if not room:
+        room = message.room
+    inits = await get_initiatives(opsdroid, room)
     if inits:
         await message.respond('\n'.join(
             [f'{charname} ({inits[charname]})' for charname in inits])) #init_order)
@@ -109,30 +112,31 @@ async def next_player(opsdroid, config, message):
         await message.respond(f"Next up: {nextup}")
 
 
-@match_regex(f'!init add (?P<name>\w+) (?P<initval>\d+)', case_sensitive=False)
+@match_regex(f'!init add (?P<name>\w+) (?P<initval>\d+)( !mem-in (?P<memroom>))', case_sensitive=False)
 async def add_character(opsdroid, config, message):
     match = message.regex.group
     charname = match('name').title()
     initval = int(match('initval'))
+    room = match('memroom')
+    room = room if room else message.room
+
     # Get current order from memory and determine current player
-    inits = await get_initiatives(opsdroid, message.room)
-    active_char = next(iter(inits))
+    inits = await get_initiatives(opsdroid, room)
+    # active_char = next(iter(inits))
 
     # Add new character to order
-    newchar = await get_character(charname, opsdroid, config, message)
-    inits[newchar.name] = initval
+    # newchar = await get_character(charname, opsdroid, config, message, )
+    inits[charname] = initval
 
     # Resort to ensure correct relative ordering
-    inits = OrderedDict(sorted(inits.items(), key=lambda t: t[1], reverse=True))
+    # inits = OrderedDict(sorted(inits.items(), key=lambda t: t[1], reverse=True))
 
     # Re-rotate the order to bring the active player back to the top
-    top = next(iter(inits))
-    while top != active_char:
-        inits.move_to_end(top)
-        top = next(iter(inits))
-    # with memory_in_room(message.room, opsdroid):
-    #     await opsdroid.memory.put('initiatives', inits)
-    await save_new_to_memory(opsdroid, message.room, 'initiatives', inits)
+    # top = next(iter(inits))
+    # while top != active_char:
+    #     inits.move_to_end(top)
+    #     top = next(iter(inits))
+    await save_new_to_memory(opsdroid, room, 'initiatives', inits)
 
 
 @match_regex(f'!init event (?P<initval>\d+) (?P<name>\w+) (?P<text>.*)', case_sensitive=False)
