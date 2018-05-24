@@ -126,11 +126,6 @@ async def get_character(name, opsdroid, config, message, room=None):
     room = room if room else message.room
 
     # Ensure that a list of the characters exists
-    # with memory_in_room(message.room, opsdroid):
-    #     chars = await opsdroid.memory.get('chars')
-    #     if not chars:
-    #         chars = {}
-    #         await opsdroid.memory.put('chars', chars)
     chars = await load_from_memory(opsdroid, room, 'chars')
 
     logging.debug((name, chars.keys()))
@@ -154,8 +149,6 @@ async def get_character(name, opsdroid, config, message, room=None):
         logging.debug(charstats)
         char = Character(**charstats)
         await put_character(char, opsdroid, room, chars)
-        # chars[char.name.split()[0]] = char.__dict__
-        # await update_memory(opsdroid, message.room, 'chars', chars)
         await message.respond(f"Character {name} not in memory - loaded from config.")
         return char
 
@@ -175,11 +168,6 @@ async def load_character(opsdroid, config, message):
     name = name.title()
 
     # Ensure that a list of the characters exists
-    # with memory_in_room(message.room, opsdroid):
-    #     chars = await opsdroid.memory.get('chars')
-    #     if not chars:
-    #         chars = {}
-    #         await opsdroid.memory.put('chars', chars)
     chars = await load_from_memory(opsdroid, message.room, 'chars')
 
     logging.debug((name, chars.keys()))
@@ -191,8 +179,6 @@ async def load_character(opsdroid, config, message):
     logging.debug(charstats)
     char = Character(**charstats)
     await put_character(char, opsdroid, message.room, chars)
-    # chars[char.name.split()[0]] = char.__dict__
-    # await update_memory(opsdroid, message.room, 'chars', chars)
     await message.respond(f"Character loaded from config.")
     return char
 
@@ -216,12 +202,9 @@ async def list_characters(opsdroid, config, message):
 
 async def put_character(char, opsdroid, room, chars=None):
     """Save a character into memory"""
-    # with memory_in_room(room, opsdroid):
     if not chars:
-        # chars = await opsdroid.memory.get('chars')
         chars = await load_from_memory(opsdroid, room, 'chars')
     chars[char.name.split()[0]] = char.__dict__
-    # await opsdroid.memory.put('chars', chars)
     await update_memory(opsdroid, room, 'chars', chars)
 
 
