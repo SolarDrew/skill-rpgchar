@@ -198,6 +198,14 @@ async def remove_character(opsdroid, config, message):
     await save_new_to_memory(opsdroid, room, 'chars', chars)
 
 
+@match_regex(f'!clear characters( !usemem (?P<memroom>\w+))?', case_sensitive=False)
+async def clear_characters(opsdroid, config, message):
+    room = message.regex.group('memroom')
+    room = room if room else message.room
+
+    await save_new_to_memory(opsdroid, room, 'chars', {})
+
+
 @match_regex(f'!list characters( !usemem (?P<memroom>\w+))?', case_sensitive=False)
 async def list_characters(opsdroid, config, message):
     room = message.regex.group('memroom')
