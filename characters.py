@@ -156,19 +156,24 @@ async def get_character(name, opsdroid, config, message, room=None):
     return Character(**charstats)
 
 
-@match_regex(f'!load( !usemem (?P<memroom>\w+))? (?P<name>\w+) (?P<file>.*)',
+@match_regex(f'!load( !usemem (?P<memroom>\w+))? ((?P<name>\D+)|((?P<n>\d)x)) (?P<file>.*)',
              case_sensitive=False)
 async def load_character(opsdroid, config, message):
     match = message.regex.group
     name = match('name')
+    ntimes = int(match('n'))
     room = match('memroom')
     room = room if room else message.room
     loadfile = match('file')
-    if not loadfile[-5:] == '.yaml':
-        loadfile += '.yaml'
 
     # Remove burden of case-sensitivity from the user
-    name = name.title()
+    if name:
+        name = name.title()
+        ntimes = 1
+    else:
+        name = loadfile.split('/')[1].title()+'_'
+    if not loadfile[-5:] == '.yaml':
+        loadfile += '.yaml'
 
     # Ensure that a list of the characters exists
     chars = await load_from_memory(opsdroid, room, 'chars')
@@ -176,14 +181,16 @@ async def load_character(opsdroid, config, message):
     logging.debug((name, chars.keys()))
     if opsdroid.config.get('module-path', None):
         loadfile = join(opsdroid.config['module-path'], loadfile)
-    with open(loadfile) as f:
-        charstats = yaml.safe_load(f)
+    for n in range(ntimes):
+        with open(loadfile) as f:
+            charstats = yaml.safe_load(f)
+        if ntimes > 1:
+            name = name[:-1] + str(n+1)
         charstats['name'] = name
-    logging.debug(charstats)
-    char = Character(**charstats)
-    await put_character(char, opsdroid, room, chars)
+        logging.debug(charstats)
+        chars[name] = charstats
+    await update_memory(opsdroid, room, 'chars', chars)
     await message.respond(f"Character loaded from config.")
-    return char
 
 
 @match_regex(f'!remove {OBJECT}( !usemem (?P<memroom>\w+))?', case_sensitive=False)
