@@ -130,12 +130,17 @@ async def get_character(name, opsdroid, config, message, room=None):
 
     logging.debug((name, chars.keys()))
     if name not in chars.keys():
+        conn = opsdroid.default_connector
+        for connroom in conn.rooms:
+            if room == connroom or room == conn.room_ids[connroom]:
+                roomname = connroom
+                break
         if opsdroid.config.get('module-path', None):
             charstats = join(opsdroid.config['module-path'],
                              # 'opsdroid-modules', 'skill', 'rpgchar',
-                             config['chars'][name])
+                             config['campaigns'][roomname][name])
         else:
-            charstats = config['chars'][name]
+            charstats = config['campaigns'][roomname][name]
         if isinstance(charstats, str):
             with open(charstats) as f:
                 charstats = yaml.safe_load(f)
@@ -259,10 +264,25 @@ async def howami(opsdroid, config, message):
         state_message = 'in mortal peril!'
 
     msg_text =  f"{prefix} {state_message}" # ({char.current_hp}/{char.max_hp})"
-    if message.room == 'main' or name.upper == 'I' or name in config['chars'].keys():
+    players = await get_players(opsdroid, config, message.room)
+    if message.room == 'main' or name.upper == 'I' or name in players:
         msg_text += f"({char.current_hp}/{char.max_hp})"
 
     await message.respond(msg_text)
+
+
+async def get_players(opsdroid, config, room):
+    conn = opsdroid.default_connector
+    for connroom in conn.rooms:
+        if room == connroom or room == conn.room_ids[connroom]:
+            roomname = connroom
+            break
+    try:
+        players = config['campaigns'][roomname].keys()
+    except KeyError:
+        players = []
+
+    return players
 
 
 async def grant_xp(charname, nXP, opsdroid, config, message):
