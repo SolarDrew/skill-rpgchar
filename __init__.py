@@ -45,3 +45,23 @@ async def to_room(opsdroid, config, message):
     match = message.regex.group
 
     await message.respond(match('msg'), room=match('roomname'))
+
+
+@match_regex("!help", case_sensitive=False)
+async def user_help(opsdroid, config, message):
+    await message.respond(f"""
+        Greetings, adventurers!
+
+        I'm the DMBot and I'm here to make {config['game_master']}'s life a little easier. I can
+        automate weapon attacks, skill and ability checks, and initiative tracking. Here are some of
+        the ways you can interact with me.
+
+        - To find out your name, race and class: "who am I?"
+        - To check your current hit point total: "how am I?"
+        - To make a weapon attack: "I attack <target's name> with my <weapon>"
+
+        For all these things to work you need to set your display name to your character's name. To
+        change it in Riot, type "/devtools" and go to "Explore Room State" -> "m.room.member" ->
+        "<your username>" -> "Edit", then change the "displayname" entry to the name of your
+        character.
+    """) # Probably want more than this here
