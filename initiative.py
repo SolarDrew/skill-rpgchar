@@ -48,8 +48,7 @@ async def get_initiatives(opsdroid, room):
 @match_regex("!init order( !usemem (?P<memroom>\w+))?")
 async def report_order(opsdroid, config, message):
     room  = message.regex.group('memroom')
-    if not room:
-        room = message.room
+    room = room if room else message.room
     inits = await get_initiatives(opsdroid, room)
     if inits:
         await message.respond('\n'.join(
@@ -92,7 +91,8 @@ async def next_player(opsdroid, config, message):
         await message.respond(f"Next up: {nextup}")
 
 
-@match_regex(f'!init add (?P<name>\w+) (?P<initval>\d+)( !usemem (?P<memroom>\w+))?', case_sensitive=False)
+@match_regex(f'!init add (?P<name>\w+) (?P<initval>\d+)( !usemem (?P<memroom>\w+))?',
+             case_sensitive=False)
 async def add_character(opsdroid, config, message):
     match = message.regex.group
     charname = match('name').title()
@@ -109,7 +109,7 @@ async def add_character(opsdroid, config, message):
     await save_new_to_memory(opsdroid, room, 'initiatives', inits)
 
 
-@match_regex(f'!init event (?P<initval>\d+) (?P<name>\w+) (?P<text>.*)( !usemem (?P<memroom>\w+)$)?',
+@match_regex(f'!init event( !usemem (?P<memroom>\w+))? (?P<initval>\d+) (?P<name>\w+) (?P<text>.*)',
              case_sensitive=False)
 async def add_event(opsdroid, config, message):
     match = message.regex.group

@@ -156,10 +156,13 @@ async def get_character(name, opsdroid, config, message, room=None):
     return Character(**charstats)
 
 
-@match_regex(f'!load (?P<name>\w+) (?P<file>.*)', case_sensitive=False)
+@match_regex(f'!load( !usemem (?P<memroom>\w+))? (?P<name>\w+) (?P<file>.*)',
+             case_sensitive=False)
 async def load_character(opsdroid, config, message):
     match = message.regex.group
     name = match('name')
+    room = match('memroom')
+    room = room if room else message.room
     loadfile = match('file')
     if not loadfile[-5:] == '.yaml':
         loadfile += '.yaml'
@@ -168,7 +171,7 @@ async def load_character(opsdroid, config, message):
     name = name.title()
 
     # Ensure that a list of the characters exists
-    chars = await load_from_memory(opsdroid, message.room, 'chars')
+    chars = await load_from_memory(opsdroid, room, 'chars')
 
     logging.debug((name, chars.keys()))
     if opsdroid.config.get('module-path', None):
@@ -178,24 +181,28 @@ async def load_character(opsdroid, config, message):
         charstats['name'] = name
     logging.debug(charstats)
     char = Character(**charstats)
-    await put_character(char, opsdroid, message.room, chars)
+    await put_character(char, opsdroid, room, chars)
     await message.respond(f"Character loaded from config.")
     return char
 
 
-@match_regex(f'!remove {OBJECT}', case_sensitive=False)
+@match_regex(f'!remove {OBJECT}( !usemem (?P<memroom>\w+))?', case_sensitive=False)
 async def remove_character(opsdroid, config, message):
     match = message.regex.group
     name = match('object').title()
+    room = match('memroom')
+    room = room if room else message.room
 
-    chars = await load_from_memory(opsdroid, message.room, 'chars')
+    chars = await load_from_memory(opsdroid, room, 'chars')
     chars.pop(name)
-    await save_new_to_memory(opsdroid, message.room, 'chars', chars)
+    await save_new_to_memory(opsdroid, room, 'chars', chars)
 
 
-@match_regex(f'!list characters', case_sensitive=False)
+@match_regex(f'!list characters( !usemem (?P<memroom>\w+))?', case_sensitive=False)
 async def list_characters(opsdroid, config, message):
-    chars = await load_from_memory(opsdroid, message.room, 'chars')
+    room = message.regex.group('memroom')
+    room = room if room else message.room
+    chars = await load_from_memory(opsdroid, room, 'chars')
     await message.respond('\n'.join(
         [f'{Character(**chars[char])}' for char in chars])) # Could do with clearer var names here..
 
@@ -229,10 +236,10 @@ async def howami(opsdroid, config, message):
         prefix = "You're"
     else:
         prefix = "They're"
-    room = match('memroom')
+    room = message.regex.group('memroom')
     room = room if room else message.room
 
-    char = await get_character(name, opsdroid, config, message)
+    char = await get_character(name, opsdroid, config, message, room)
 
     state = char.current_hp / char.max_hp
     if state == 1:
@@ -245,7 +252,7 @@ async def howami(opsdroid, config, message):
         state_message = 'in mortal peril!'
 
     msg_text =  f"{prefix} {state_message}" # ({char.current_hp}/{char.max_hp})"
-    if message.room == DM-private or name.upper == 'I' or name in config['chars'].keys():
+    if message.room == 'main' or name.upper == 'I' or name in config['chars'].keys():
         msg_text += f"({char.current_hp}/{char.max_hp})"
 
     await message.respond(msg_text)
@@ -296,11 +303,14 @@ async def make_check(opsdroid, config, message):
     await message.respond(f"{charname} gets {total} ({' + '.join(str(r) for r in rolls)})!")
 
 
-@match_regex(f'!setvalue {OBJECT} (?P<attribute>\w+) (?P<value>\d+)', case_sensitive=False)
+@match_regex(f'!setvalue {OBJECT} (?P<attribute>\w+) (?P<value>\d+)( !usemem (?P<memroom>\w+))?',
+             case_sensitive=False)
 async def set_value(opsdroid, config, message):
     match = message.regex.group
     charname = match('object')
+    room = match('memroom')
+    room = room if room else message.room
 
-    char = await get_character(charname, opsdroid, config, message)
+    char = await get_character(charname, opsdroid, config, message, room)
     setattr(char, match('attribute'), int(match('value')))
-    await put_character(char, opsdroid, message.room)
+    await put_character(char, opsdroid, room)
