@@ -234,7 +234,7 @@ async def whoami(opsdroid, config, message):
         await message.respond(f"You are {char}, a fearless adventurer!")
 
 
-@match_regex(f"how( '?s|am|is) {SUBJECT}( !usemem (?P<memroom>\w+))?", case_sensitive=False)
+@match_regex(f"how('?s| am| is) {SUBJECT}( !usemem (?P<memroom>\w+))?", case_sensitive=False)
 async def howami(opsdroid, config, message):
     """Basic reporting of characters' current health."""
     name = message.regex.group('subject')
