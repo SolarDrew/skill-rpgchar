@@ -100,7 +100,7 @@ class Character:
 
         return check_total, check_roll
 
-    def skill_check(self, skill):
+    def skill_check(self, skill, passive=False):
         """Make a check for the specified skill and return the roll, modifier and total"""
         # TODO No proficiency here, need to add that
         # TODO Also replace this big ugly if block with a dictionary somewhere.
@@ -115,7 +115,7 @@ class Character:
         elif skill.lower() in ['deception', 'intimidation', 'performance', 'persuasion']:
             ability = 'Cha'
 
-        return self.ability_check(ability)
+        return self.ability_check(ability, passive=passive)
 
 
 async def get_character(name, opsdroid, config, message, room=None):
@@ -329,7 +329,7 @@ async def make_check(opsdroid, config, message):
     if skill in ['Str', 'Dex', 'Con', 'Int', 'Wis', 'Cha']:
         total, rolls = char.ability_check(skill, passive=passive)
     else:
-        total, rolls = char.skill_check(skill)
+        total, rolls = char.skill_check(skill, passive=passive)
 
     await message.respond(f"{charname} gets {total} ({' + '.join(str(r) for r in rolls)})!")
 
