@@ -92,9 +92,9 @@ class Character:
         proficiencies = [2, 3, 4, 5, 6]
         return proficiencies[(int(self.level) - 1) // 4]
 
-    def ability_check(self, ability):
+    def ability_check(self, ability, passive=False):
         """Make a check for the specified ability and return the roll, modifier and total"""
-        base_roll = randint(1, 20)
+        base_roll = 10 if passive else randint(1, 20)
         check_roll = [base_roll, self.modifier(ability)]
         check_total = sum(check_roll)
 
@@ -313,17 +313,21 @@ async def parse_xp(opsdroid, config, message):
         grant_xp(charname, XP, opsdroid, config, message)
 
 
-@match_regex(f'{OBJECT},? makes? an? (?P<skill>\w+) check', case_sensitive=False)
+@match_regex(f'{OBJECT},? makes? an? (?P<p>passive )?(?P<skill>\w+) check( !usemem (?P<memroom>\w+))?',
+             case_sensitive=False)
 async def make_check(opsdroid, config, message):
     match = message.regex.group
     charname = match('object')
+    passive = match('p')
+    room = match('memroom')
+    room = room if room else message.room
     if charname.upper() == 'I':
         charname = message.user
     skill = match('skill').title()
 
-    char = await get_character(charname, opsdroid, config, message)
+    char = await get_character(charname, opsdroid, config, message, room)
     if skill in ['Str', 'Dex', 'Con', 'Int', 'Wis', 'Cha']:
-        total, rolls = char.ability_check(skill)
+        total, rolls = char.ability_check(skill, passive=passive)
     else:
         total, rolls = char.skill_check(skill)
 
