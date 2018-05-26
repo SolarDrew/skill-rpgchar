@@ -49,19 +49,14 @@ async def to_room(opsdroid, config, message):
 
 @match_regex("!help", case_sensitive=False)
 async def user_help(opsdroid, config, message):
-    await message.respond(f"""
-        Greetings, adventurers!
+    await message.respond(f"""Greetings, adventurers!
 
-        I'm the DMBot and I'm here to make {config['game_master']}'s life a little easier. I can
-        automate weapon attacks, skill and ability checks, and initiative tracking. Here are some of
-        the ways you can interact with me.
+I'm the DMBot and I'm here to make {config['game_master']}'s life a little easier. I can automate weapon attacks, skill and ability checks, and initiative tracking. Here are some of the ways you can interact with me.
 
-        - To find out your name, race and class: "who am I?"
-        - To check your current hit point total: "how am I?"
-        - To make a weapon attack: "I attack <target's name> with my <weapon>"
+  - To find out your name, race and class: "who am I?"
+  - To check your current hit point total: "how am I?"
+  - To make a weapon attack: "I attack <target's name> with my <weapon>"
+  - To make an ability check: "I make a <str/dex/con/int/wis/cha> check"
+  - To make a skill check: "I make a <name of skill> check
 
-        For all these things to work you need to set your display name to your character's name. To
-        change it in Riot, type "/devtools" and go to "Explore Room State" -> "m.room.member" ->
-        "<your username>" -> "Edit", then change the "displayname" entry to the name of your
-        character.
-    """) # Probably want more than this here
+    For all these things to work you need to set your display name to your character's name. If you're using Riot, you can change it by typing "/devtools" and going to "Explore Room State" -> "m.room.member" -> "<your username>" -> "Edit", then changing the "displayname" entry to the name of your character.""") # Probably want more than this here
