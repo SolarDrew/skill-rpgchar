@@ -59,4 +59,4 @@ I'm the DMBot and I'm here to make {config['game_master']}'s life a little easie
   - To make an ability check: "I make a <str/dex/con/int/wis/cha> check"
   - To make a skill check: "I make a <name of skill> check
 
-    For all these things to work you need to set your display name to your character's name. If you're using Riot, you can change it by typing "/devtools" and going to "Explore Room State" -> "m.room.member" -> "<your username>" -> "Edit", then changing the "displayname" entry to the name of your character.""") # Probably want more than this here
+For all these things to work you need to set your display name to your character's name. If you're using Riot, you can change it by typing "/devtools" and going to "Explore Room State" -> "m.room.member" -> "<your username>" -> "Edit", then changing the "displayname" entry to the name of your character.""") # Probably want more than this here
