@@ -8,7 +8,7 @@ from random import randint
 from opsdroid.matchers import match_regex
 
 from .characters import get_character
-# from .picard import load_from_memory, save_new_to_memory, update_memory #memory_in_room
+from .picard import load_from_memory, save_new_to_memory, update_memory
 
 @match_regex('roll initiative', case_sensitive=False)
 async def create_initiative(opsdroid, config, message):
