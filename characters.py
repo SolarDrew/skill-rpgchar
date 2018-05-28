@@ -135,11 +135,10 @@ async def get_character(name, opsdroid, config, message, room=None):
                 roomname = connroom
                 break
         if opsdroid.config.get('module-path', None):
-            charstats = join(opsdroid.config['module-path'],
-                             # 'opsdroid-modules', 'skill', 'rpgchar',
+            charstats = join(opsdroid.config['module-path'], 'characters',
                              config['campaigns'][roomname]['characters'][name])
         else:
-            charstats = config['campaigns'][roomname]['characters'][name]
+            charstats = join('characters', config['campaigns'][roomname]['characters'][name])
         if isinstance(charstats, str):
             with open(charstats) as f:
                 charstats = yaml.safe_load(f)
