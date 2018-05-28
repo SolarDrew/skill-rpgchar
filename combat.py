@@ -10,9 +10,6 @@ from opsdroid.matchers import match_regex
 from .constants.regex_constants import *
 from .characters import get_character, put_character
 
-MELEE_WEAPONS = ['sword', 'dagger']
-RANGED_WEAPONS = ['bow', 'crossbow']
-
 
 async def weapon_attack(attacker, defender, weapon, opsdroid, config, message):
     """
@@ -26,15 +23,12 @@ async def weapon_attack(attacker, defender, weapon, opsdroid, config, message):
 
     # Make attack roll
     base_roll = randint(1, 20)
-    if weapon in RANGED_WEAPONS:
-        mod = attacker.modifier('Dex')
-    else:
-        mod = attacker.modifier('Str')
+    mod = attacker.modifier(weapon['modifier'])
     atk_roll = [base_roll, attacker.proficiency, mod]
     atk_total = sum(atk_roll)
     if atk_total >= defender.AC or base_roll == 20 and base_roll != 1:
         hitmiss = 'hits'
-        match = re.match("(?P<ndice>\d+)?(?:d(?P<dice>\d+))", weapon)
+        match = re.match("(?P<ndice>\d+)?(?:d(?P<dice>\d+))", weapon['damage'])
         ndice = match.group('ndice')
         ndice = int(ndice) if ndice else 1
         ndice = ndice * 2 if base_roll == 20 else ndice
