@@ -22,7 +22,6 @@ async def load_scene(opsdroid, config, message):
     room = room if room else message.room
 
     dm_scenes = await load_from_memory(opsdroid, 'main', 'scenes')
-    # logging.debug(f'1==={dm_scenes.keys()}')
     roomname = get_roomname(opsdroid, room)
     current_scene = dm_scenes.get(roomname, None)
     if not fname:
@@ -35,7 +34,7 @@ async def load_scene(opsdroid, config, message):
         scene_info = yaml.safe_load(f)
 
     # Check the scene against previously visited scenes and do things if it's new
-    previous_scenes = {'scenes': []} # await load_from_memory(opsdroid, room, 'prev_scenes', {'scenes': []})
+    previous_scenes = await load_from_memory(opsdroid, room, 'prev_scenes', {'scenes': []})
     if scene_info['name'] not in previous_scenes['scenes']:
         intro = scene_info['intro_text']
         if isinstance(intro, dict):
@@ -65,25 +64,21 @@ async def load_scene(opsdroid, config, message):
 
     # Store the defined info for the DM in the DM room
     dm_info = scene_info['dm_info']
-    # logging.debug(f'4==={dm_info.keys()}')
     if 'loadfile' in dm_info.keys():
         loadfile = join(folder, dm_info.pop('loadfile'))
         with open(loadfile) as f:
             loaded = yaml.safe_load(f)
         dm_info.update(loaded['dm_info'])
-    # logging.debug(f'5==={dm_info.keys()}')
     # DM will likely be dealing with several scenes across adventures, so they'll need to be stored
     # per-room
     dm_scenes.update({roomname: dm_info})
-    # logging.debug(f'6==={dm_scenes.keys()}')
     await save_new_to_memory(opsdroid, 'main', 'scenes', dm_scenes)
     previous_scenes['scenes'].append(scene_info['name'])
-    # await update_memory(opsdroid, room, 'prev_scenes', previous_scenes)
-    await save_new_to_memory(opsdroid, room, 'prev_scenes', {'scenes': []}) # Have the above trigger every time for now, for testing
+    await update_memory(opsdroid, room, 'prev_scenes', previous_scenes)
 
     # Reporting is useful
     name = scene_info['name']
-    features = '\t\t'.join(dm_info.keys()) # not completely convinced this is correct
+    features = '\t\t'.join(dm_info.keys())
     await message.respond(f"Moved to scene '{name}'\nFeatures of this scene:\n{features}",
                           room='main')
 
