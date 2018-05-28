@@ -8,10 +8,9 @@ from os.path import join
 from random import randint
 
 from opsdroid.matchers import match_regex
-from opsdroid.message import Message
 
 from .constants.regex_constants import *
-from .picard import load_from_memory, save_new_to_memory, update_memory
+from .picard import load_from_memory, save_new_to_memory, update_memory, get_roomname
 
 
 level_XPs = [0, 300, 900, 2700, 6500,
@@ -272,13 +271,9 @@ async def howami(opsdroid, config, message):
 
 
 async def get_players(opsdroid, config, room):
-    conn = opsdroid.default_connector
-    for connroom in conn.rooms:
-        if room == connroom or room == conn.room_ids[connroom]:
-            roomname = connroom
-            break
+    roomname = get_roomname(opsdroid, room)
     try:
-        players = config['campaigns'][roomname].keys()
+        players = config['campaigns'][roomname]['characters'].keys()
     except KeyError:
         players = []
 

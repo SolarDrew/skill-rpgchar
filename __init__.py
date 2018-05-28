@@ -10,6 +10,7 @@ from .combat import attack
 from .characters import whoami, howami, Character #get_character, put_character
 from .initiative import create_initiative
 from .picard import intent_self_in_room, get_matrix_connector, load_from_memory, update_memory
+from .scenes import load_scene, get_info
 
 
 def setup(opsdroid):
@@ -59,4 +60,4 @@ I'm the DMBot and I'm here to make {config['game_master']}'s life a little easie
   - To make an ability check: "I make a <str/dex/con/int/wis/cha> check"
   - To make a skill check: "I make a <name of skill> check
 
-For all these things to work you need to set your display name to your character's name. If you're using Riot, you can change it by typing "/devtools" and going to "Explore Room State" -> "m.room.member" -> "<your username>" -> "Edit", then changing the "displayname" entry to the name of your character.""") # Probably want more than this here
+For all these things to work you need to set your display name to your character's name. If you're using Riot, you can change it by typing "/devtools" and going to "Explore Room State" -> "m.room.member" -> "<your username>" -> "Edit", then changing the "displayname" entry to the name of your character.""")

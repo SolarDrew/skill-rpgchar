@@ -262,3 +262,15 @@ def memory_in_room(room, opsdroid):
     opsdroid.memory.databases[0].room = room
     yield opsdroid
     opsdroid.memory.databases[0].room = opsdroid.default_connector.default_room
+
+
+def get_roomname(opsdroid, room):
+    if room[0] == '#' or room[0] == '!':
+        conn = opsdroid.default_connector
+        for connroom in conn.rooms:
+            if room == connroom or room == conn.room_ids[connroom]:
+                roomname = connroom
+                break
+        return roomname
+
+    return room
