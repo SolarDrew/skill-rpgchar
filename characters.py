@@ -137,9 +137,9 @@ async def get_character(name, opsdroid, config, message, room=None):
         if opsdroid.config.get('module-path', None):
             charstats = join(opsdroid.config['module-path'],
                              # 'opsdroid-modules', 'skill', 'rpgchar',
-                             config['campaigns'][roomname][name])
+                             config['campaigns'][roomname]['characters'][name])
         else:
-            charstats = config['campaigns'][roomname][name]
+            charstats = config['campaigns'][roomname]['characters'][name]
         if isinstance(charstats, str):
             with open(charstats) as f:
                 charstats = yaml.safe_load(f)
