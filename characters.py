@@ -23,7 +23,7 @@ class Character:
     def __init__(self, name, level, max_hp, race, class_, AC, abilities,
                  XP=0, current_hp=None, weapons=None, unconscious=False,
                  death_saves={'success': 0, 'fail': 0}):
-        self.name = name
+        self._name = name
         self.level = level # Change this to XP and calculate level
         self.race = race
         self.class_ = class_
@@ -115,6 +115,10 @@ class Character:
             ability = 'Cha'
 
         return self.ability_check(ability, passive=passive)
+
+    @property
+    def name(self):
+        return self._name.split()[0] if ' ' in self._name else self._name
 
 
 async def get_character(name, opsdroid, config, message, room=None):
