@@ -6,6 +6,7 @@ import yaml
 import logging
 from os.path import join
 from random import randint
+from collections import OrderedDict as od
 
 from opsdroid.matchers import match_regex
 
@@ -115,6 +116,35 @@ class Character:
             ability = 'Cha'
 
         return self.ability_check(ability, passive=passive)
+
+    def attack(self, target, weapon, message):
+        # Get basic modifiers which apply to attack rolls generally
+        mods = od({weapon['modifier']: self.modifier(weapon['modifier']),
+                   'proficiency': self.proficiency})
+        # Resolve any other conditions which would affect the roll
+        adv = 0
+
+        if adv:
+            a, b = randint(1, 20), randint(1, 20)
+            base_roll = max(a, b) * adv
+        else:
+            base_roll = randint(1, 20)
+
+        atk_roll = od()
+        atk_roll['roll'] = base_roll
+        atk_roll.update(mods)
+        atk_total = sum(atk_roll.values())
+
+        # Report result of the attack
+        hitmiss = 'misses'
+        critmod = ' critically ' if base_roll in [1, 20] else ' '
+        if atk_total >= target.AC or base_roll == 20 and base_roll != 1:
+            hitmiss = 'hits'
+        critmod = ' critically ' if base_roll in [1, 20] else ' '
+        await message.respond(f"{self.name}{critmod}{hitmiss} {target.name}!")
+        await message.respond(f"({', '.join([f'{name}: {val}' for name, val in atk_roll])})")
+
+        return atk_roll
 
     @property
     def name(self):
