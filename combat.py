@@ -2,8 +2,10 @@
 Docstring
 """
 import re
+import logging
 from functools import partial
 from random import randint
+from collections import OrderedDict as od
 
 from opsdroid.matchers import match_regex
 

@@ -2,10 +2,12 @@
 Docstring
 """
 
+import re
 import yaml
 import logging
 from os.path import join
 from random import randint
+from functools import partial
 from collections import OrderedDict as od
 
 from opsdroid.matchers import match_regex
@@ -24,7 +26,7 @@ class Character:
     def __init__(self, name, level, max_hp, race, class_, AC, abilities,
                  XP=0, current_hp=None, weapons=None, unconscious=False,
                  death_saves={'success': 0, 'fail': 0}):
-        self._name = name
+        self.name = name
         self.level = level # Change this to XP and calculate level
         self.race = race
         self.class_ = class_
@@ -45,7 +47,7 @@ class Character:
     def __repr__(self):
         return f"{self.name} ({self.race} {self.class_} {self.level})"
 
-    async def take_damage(self, ndamage, opsdroid, config, message):
+    async def take_damage(self, ndamage, opsdroid, message):
         """Handle removing of health from the character by e.g. a weapon attack."""
         # Damage happens
         self.current_hp -= ndamage
@@ -56,7 +58,7 @@ class Character:
         # elif self.current_hp < 0:
         #     self.unconscious = True
         if self.current_hp < 0:
-            await self.die(opsdroid, config, message)
+            await self.die(opsdroid, message)
         else:
             await put_character(self, opsdroid, message.room)
 
@@ -75,16 +77,16 @@ class Character:
         """Return the modifier for a given ability"""
         return (self.abilities[ability]-10) // 2
 
-    async def die(self, opsdroid, config, message):
+    async def die(self, opsdroid, message):
         """Remove the character from the game without pissing off the player"""
         # Here because it's a circular import otherwise. Consider refactoring
         from .initiative import remove_from_initiative
 
-        await remove_from_initiative(self.name, opsdroid, message.room)
+        await remove_from_initiative(self.shortname(), opsdroid, message.room)
         chars = await load_from_memory(opsdroid, message.room, 'chars')
-        chars.pop(self.name.split()[0])
+        chars.pop(self.shortname())
         await save_new_to_memory(opsdroid, message.room, 'chars', chars)
-        await message.respond(f"{self.name} died!")
+        await message.respond(f"{self.shortname()} died!")
 
     @property
     def proficiency(self):
@@ -147,9 +149,6 @@ class Character:
 
         return atk_roll, atk_total
 
-    @property
-    def name(self):
-        return self._name.split()[0] if ' ' in self._name else self._name
     async def roll_damage(self, target, weapon_name, message, opsdroid, critical=False):
         weapon = self.weapons[weapon_name]
 
@@ -172,6 +171,9 @@ class Character:
         await message.respond(f"({', '.join([f'{name}: {val}' for name, val in dmg_roll.items()])})")
 
         return dmg_roll, dmg_total
+
+    def shortname(self):
+        return self.name.split()[0] if ' ' in self.name else self.name
 
 
 async def get_character(name, opsdroid, config, message, room=None):
@@ -221,7 +223,7 @@ async def get_character(name, opsdroid, config, message, room=None):
 async def load_character(opsdroid, config, message):
     match = message.regex.group
     name = match('name')
-    ntimes = int(match('n'))
+    ntimes = int(match('n')) if match('n') else 1
     room = match('memroom')
     room = room if room else message.room
     loadfile = match('file')
@@ -229,7 +231,6 @@ async def load_character(opsdroid, config, message):
     # Remove burden of case-sensitivity from the user
     if name:
         name = name.title()
-        ntimes = 1
     else:
         name = loadfile.split('/')[1].title()+'_'
     if not loadfile[-5:] == '.yaml':
@@ -278,7 +279,7 @@ async def put_character(char, opsdroid, room, chars=None):
     """Save a character into memory"""
     if not chars:
         chars = await load_from_memory(opsdroid, room, 'chars')
-    chars[char.name.split()[0]] = char.__dict__
+    chars[char.name] = char.__dict__
     await update_memory(opsdroid, room, 'chars', chars)
 
 
