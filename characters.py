@@ -117,16 +117,16 @@ class Character:
 
         return self.ability_check(ability, passive=passive)
 
-    def attack(self, target, weapon, message):
+    async def attack(self, target, weapon_name, message, adv=None):
+        weapon = self.weapons[weapon_name]
         # Get basic modifiers which apply to attack rolls generally
         mods = od({weapon['modifier']: self.modifier(weapon['modifier']),
                    'proficiency': self.proficiency})
         # Resolve any other conditions which would affect the roll
-        adv = 0
 
         if adv:
             a, b = randint(1, 20), randint(1, 20)
-            base_roll = max(a, b) * adv
+            base_roll = abs(max(a*adv, b*adv))
         else:
             base_roll = randint(1, 20)
 
@@ -140,15 +140,38 @@ class Character:
         critmod = ' critically ' if base_roll in [1, 20] else ' '
         if atk_total >= target.AC or base_roll == 20 and base_roll != 1:
             hitmiss = 'hits'
-        critmod = ' critically ' if base_roll in [1, 20] else ' '
-        await message.respond(f"{self.name}{critmod}{hitmiss} {target.name}!")
-        await message.respond(f"({', '.join([f'{name}: {val}' for name, val in atk_roll])})")
+        hitmiss = 'critically ' + hitmiss if base_roll in [1, 20] else hitmiss
+        await message.respond(f"{self.shortname()} {hitmiss} {target.shortname()}"
+            f" with a roll of {atk_total}!")
+        await message.respond(f"({', '.join([f'{name}: {val}' for name, val in atk_roll.items()])})")
 
-        return atk_roll
+        return atk_roll, atk_total
 
     @property
     def name(self):
         return self._name.split()[0] if ' ' in self._name else self._name
+    async def roll_damage(self, target, weapon_name, message, opsdroid, critical=False):
+        weapon = self.weapons[weapon_name]
+
+        mods = od({weapon['modifier']: self.modifier(weapon['modifier'])})
+
+        match = re.match("(?P<ndice>\d+)?(?:d(?P<dice>\d+))", weapon['damage'])
+        ndice = match.group('ndice')
+        ndice = int(ndice) if ndice else 1
+        ndice = ndice * 2 if critical else ndice
+        dice = int(match.group('dice'))
+
+        dmg_roll = od()
+        dmg_roll['roll'] = list(map(partial(randint, 1), [dice]*ndice))
+        dmg_roll.update(mods)
+        dmg_total = sum(dmg_roll['roll']) + sum(mods.values())
+
+        await target.take_damage(dmg_total, opsdroid, message)
+
+        await message.respond(f"{target.name} takes {dmg_total} damage!")
+        await message.respond(f"({', '.join([f'{name}: {val}' for name, val in dmg_roll.items()])})")
+
+        return dmg_roll, dmg_total
 
 
 async def get_character(name, opsdroid, config, message, room=None):

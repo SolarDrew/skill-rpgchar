@@ -54,7 +54,9 @@ async def weapon_attack(attacker, defender, weapon, opsdroid, config, message):
     return report, defender
 
 
-@match_regex(f'{OBJECT} {ATK_VERB} {SUBJECT} with {POSSESSIVE} {WEAPON}', case_sensitive=False)
+@match_regex(f'{OBJECT} {ATK_VERB} {SUBJECT} with {POSSESSIVE} {WEAPON}'
+             f'( with (?P<adv>advantage|disadvantage))?',
+             case_sensitive=False)
 async def attack(opsdroid, config, message):
     """
     Detect when a character is attacking another character.
@@ -69,9 +71,14 @@ async def attack(opsdroid, config, message):
     attacker = await get_character(atkr_name, opsdroid, config, message)
     def_name = match('subject')
     defender = await get_character(def_name, opsdroid, config, message)
-    weapon = attacker.weapons[match('weapon')]
+    weapon = match('weapon')
+    adv = match('adv')
+    if adv:
+        adv = -1 if 'dis' in adv else 1
+    logging.debug(adv)
 
-    atk_report, defender = await weapon_attack(attacker, defender, weapon, opsdroid, config, message)
-
-    for msg in atk_report:
-        await message.respond(msg)
+    atk_roll, atk_total = await attacker.attack(defender, weapon,  message, adv)
+    roll = atk_roll['roll']
+    if atk_total >= defender.AC or roll == 20 and roll != 1:
+        dmg_roll, dmg_total = await attacker.roll_damage(defender, weapon, message, opsdroid,
+                                                         critical=(roll==20))
