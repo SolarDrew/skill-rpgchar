@@ -321,8 +321,8 @@ async def howami(opsdroid, config, message):
 
     msg_text =  f"{prefix} {state_message}" # ({char.current_hp}/{char.max_hp})"
     players = await get_players(opsdroid, config, message.room)
-    if message.room == 'main' or name.upper == 'I' or name in players:
-        msg_text += f"({char.current_hp}/{char.max_hp})"
+    if get_roomname(opsdroid, message.room) == 'main' or name.upper == 'I' or name in players:
+        msg_text += f" ({char.current_hp}/{char.max_hp})"
 
     await message.respond(msg_text)
 
@@ -396,4 +396,17 @@ async def set_value(opsdroid, config, message):
 
     char = await get_character(charname, opsdroid, config, message, room)
     setattr(char, match('attribute'), int(match('value')))
+    await put_character(char, opsdroid, room)
+
+@match_regex(f'!changevalue {OBJECT} (?P<attribute>\w+) (?P<value>(\+|-)\d+)'
+             f'( !usemem (?P<memroom>\w+))?', case_sensitive=False)
+async def _value(opsdroid, config, message):
+    match = message.regex.group
+    charname = match('object')
+    attr = match('attribute')
+    room = match('memroom')
+    room = room if room else message.room
+
+    char = await get_character(charname, opsdroid, config, message, room)
+    setattr(char, attr, getattr(char, attr)+int(match('value')))
     await put_character(char, opsdroid, room)
