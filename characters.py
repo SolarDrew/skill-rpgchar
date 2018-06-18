@@ -355,8 +355,6 @@ async def parse_xp(opsdroid, config, message):
 
     # Handle granting XP to the whole group
     if charname.lower() in ['everyone', 'you all', 'the party', 'the group']:
-        # with memory_in_room(message.room, opsdroid):
-        #     chars = await opsdroid.memory.get('chars', {})
         chars = await load_from_memory(opsdroid, message.room, 'chars')
         for charname in chars.keys():
             grant_xp(charname, XP, opsdroid, config, message)
