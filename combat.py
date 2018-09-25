@@ -11,6 +11,7 @@ from opsdroid.matchers import match_regex
 
 from .constants.regex_constants import *
 from .characters import get_character, put_character
+from .matchers import match_active_player
 
 
 async def weapon_attack(attacker, defender, weapon, opsdroid, config, message):

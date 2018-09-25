@@ -8,11 +8,13 @@ from os.path import join
 
 from opsdroid.matchers import match_regex
 
+from .matchers import match_gm
 from .constants.regex_constants import *
 from .picard import load_from_memory, save_new_to_memory, update_memory, get_roomname
 
 
 @match_regex(f"!goto ((?P<filename>\d\d-\w+.yaml)|(?P<exit>\w+))( !usemem (?P<memroom>\w+))?")
+@match_gm
 async def load_scene(opsdroid, config, message):
     """Load information about a scene or location from the specified file."""
     match = message.regex.group
@@ -84,6 +86,7 @@ async def load_scene(opsdroid, config, message):
 
 
 @match_regex(f"!info (?P<group>\w+)( (?P<key>\D+))?")
+@match_gm
 async def get_info(opsdroid, config, message):
     match = message.regex.group
     room = match('group')

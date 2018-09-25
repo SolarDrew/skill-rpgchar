@@ -12,6 +12,7 @@ from collections import OrderedDict as od
 
 from opsdroid.matchers import match_regex
 
+from .matchers import match_gm
 from .constants.regex_constants import *
 from .picard import load_from_memory, save_new_to_memory, update_memory, get_roomname
 
@@ -220,6 +221,7 @@ async def get_character(name, opsdroid, config, message, room=None):
 
 @match_regex(f'!load( !usemem (?P<memroom>\w+))? ((?P<name>\D+)|((?P<n>\d)x)) (?P<file>.*)',
              case_sensitive=False)
+@match_gm
 async def load_character(opsdroid, config, message):
     match = message.regex.group
     name = match('name')
@@ -255,6 +257,7 @@ async def load_character(opsdroid, config, message):
 
 
 @match_regex(f'!remove {OBJECT}( !usemem (?P<memroom>\w+))?', case_sensitive=False)
+@match_gm
 async def remove_character(opsdroid, config, message):
     match = message.regex.group
     name = match('object').title()
@@ -345,6 +348,7 @@ async def grant_xp(charname, nXP, opsdroid, config, message):
 
 
 @match_regex(f'{OBJECT} {GAIN_VERB} (?P<nXP>\d+) XP', case_sensitive=False)
+@match_gm
 async def parse_xp(opsdroid, config, message):
 
     match = message.regex.group
@@ -386,6 +390,7 @@ async def make_check(opsdroid, config, message):
 
 @match_regex(f'!setvalue {OBJECT} (?P<attribute>\w+) (?P<value>\d+)( !usemem (?P<memroom>\w+))?',
              case_sensitive=False)
+@match_gm
 async def set_value(opsdroid, config, message):
     match = message.regex.group
     charname = match('object')
@@ -398,6 +403,7 @@ async def set_value(opsdroid, config, message):
 
 @match_regex(f'!changevalue {OBJECT} (?P<attribute>\w+) (?P<value>(\+|-)\d+)'
              f'( !usemem (?P<memroom>\w+))?', case_sensitive=False)
+@match_gm
 async def _value(opsdroid, config, message):
     match = message.regex.group
     charname = match('object')

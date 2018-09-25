@@ -7,10 +7,12 @@ from collections import OrderedDict
 from random import randint
 from opsdroid.matchers import match_regex
 
+from .matchers import match_gm
 from .characters import get_character
 from .picard import load_from_memory, save_new_to_memory, update_memory
 
 @match_regex('roll initiative', case_sensitive=False)
+@match_gm
 async def create_initiative(opsdroid, config, message):
     """
     Roll initiative for everyone in the list of characters and store a list of those rolls.
@@ -93,6 +95,7 @@ async def next_player(opsdroid, config, message):
 
 @match_regex(f'!init add (?P<name>\w+) (?P<initval>\d+)( !usemem (?P<memroom>\w+))?',
              case_sensitive=False)
+@match_gm
 async def add_character(opsdroid, config, message):
     match = message.regex.group
     charname = match('name').title()
@@ -111,6 +114,7 @@ async def add_character(opsdroid, config, message):
 
 @match_regex(f'!init event( !usemem (?P<memroom>\w+))? (?P<initval>\d+) (?P<name>\w+) (?P<text>.*)',
              case_sensitive=False)
+@match_gm
 async def add_event(opsdroid, config, message):
     match = message.regex.group
     event_name = match('name')
@@ -132,6 +136,7 @@ async def add_event(opsdroid, config, message):
 
 
 @match_regex(f'!init remove (?P<name>\w+)( !usemem (?P<memroom>\w+))?', case_sensitive=False)
+@match_gm
 async def remove_item(opsdroid, config, message):
     match = message.regex.group
     name = match('name').title()

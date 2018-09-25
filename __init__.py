@@ -5,6 +5,8 @@ import logging
 
 from opsdroid.matchers import match_regex
 
+from .matchers import match_gm
+
 # from .constants.regex_constants import *
 from .combat import attack
 from .characters import whoami, howami, Character #get_character, put_character
@@ -18,6 +20,7 @@ def setup(opsdroid):
 
 
 @match_regex(f'(you|we) (take|have) a long rest', case_sensitive=False)
+@match_gm
 async def long_rest(opsdroid, config, message):
     """
     Do all the long rest things.
