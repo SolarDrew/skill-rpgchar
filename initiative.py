@@ -73,6 +73,7 @@ async def get_active_player(opsdroid, config, message):
 
 
 @match_regex('next player', case_sensitive=False)
+@match_active_player
 async def next_player(opsdroid, config, message):
     """
     Report the next player in the initiative order so they know it's their turn.
