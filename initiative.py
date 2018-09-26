@@ -7,7 +7,7 @@ from collections import OrderedDict
 from random import randint
 from opsdroid.matchers import match_regex
 
-from .matchers import match_gm
+from .matchers import match_gm, match_active_player
 from .characters import get_character
 from .picard import load_from_memory, save_new_to_memory, update_memory
 
