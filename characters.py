@@ -180,7 +180,7 @@ class Character:
 async def get_character(name, opsdroid, config, message, room=None):
 
     # Remove burden of case-sensitivity from the user
-    name = name.title()
+    # name = name.title()
 
     room = room if room else message.room
 
