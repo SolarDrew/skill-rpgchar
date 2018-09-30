@@ -10,4 +10,7 @@ POSSESSIVE = '(a|my|his|her|their)'
 ATK_VERB = '(hits?|attacks?|swings? at|shoots?)'
 WEAPON = '(?P<weapon>\w+)'
 
+SPL_VERB = '(casts?)'
+HEAL_SPELL = '(false life)'
+
 GAIN_VERB = '(gets?|gains?)'

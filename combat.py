@@ -86,3 +86,26 @@ async def attack(opsdroid, config, message):
     if atk_total >= defender.AC or roll == 20 and roll != 1:
         dmg_roll, dmg_total = await attacker.roll_damage(defender, weapon, message, opsdroid,
                                                          critical=(roll==20))
+
+														 
+@match_regex(f'{OBJECT} {SPL_VERB} {SUBJECT} with {POSSESSIVE} {HEAL_SPELL}'
+             f'( with (?P<adv>advantage|disadvantage))?',
+             case_sensitive=False)
+@match_active_player
+async def castheal(opsdroid, config, message):
+    """
+    Detect when a character is attacking another character.
+    Just handles the overall flow of the interaction, rolls are dealt with elsewhere.
+    """
+    match = message.regex.group
+
+    # Get characters
+    atkr_name = match('object')
+    if atkr_name.upper() == 'I':
+        atkr_name = message.user
+    attacker = await get_character(atkr_name, opsdroid, config, message)
+    def_name = match('subject')
+    defender = await get_character(def_name, opsdroid, config, message)
+    weapon = match('HEAL_SPELL')
+
+	dmg_roll, dmg_total = await attacker.roll_heal(defender, weapon, message, opsdroid)
