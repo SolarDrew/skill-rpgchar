@@ -177,8 +177,8 @@ class Character:
         await message.respond(f"({', '.join([f'{name}: {val}' for name, val in dmg_roll.items()])})")
 
         return dmg_roll, dmg_total
-		
-	async def roll_heal(self, target, weapon_name, message, opsdroid):
+
+    async def roll_heal(self, target, weapon_name, message, opsdroid):
         weapon = self.weapons[weapon_name]
 
         mods = od({weapon['modifier']: self.modifier(weapon['modifier'])})
@@ -189,17 +189,17 @@ class Character:
         ndice = ndice * 2 if critical else ndice
         dice = int(match.group('dice'))
 
-        dmg_roll = od()
-        dmg_roll['roll'] = list(map(partial(randint, 1), [dice]*ndice))
-        dmg_roll.update(mods)
-        dmg_total = sum(dmg_roll['roll']) + sum(mods.values())
+        hp_roll = od()
+        hp_roll['roll'] = list(map(partial(randint, 1), [dice]*ndice))
+        hp_roll.update(mods)
+        hp_total = sum(hp_roll['roll']) + sum(mods.values())
 
-        await target.add_health(dmg_total, opsdroid, message)
+        await target.add_health(hp_total, opsdroid, message)
 
-        await message.respond(f"{target.name} heals for {dmg_total} hp!")
-        await message.respond(f"({', '.join([f'{name}: {val}' for name, val in dmg_roll.items()])})")
+        await message.respond(f"{target.name} heals for {hp_total} hp!")
+        await message.respond(f"({', '.join([f'{name}: {val}' for name, val in hp_roll.items()])})")
 
-        return dmg_roll, dmg_total
+        return hp_roll, hp_total
 
     def shortname(self):
         return self.name.split()[0] if ' ' in self.name else self.name
