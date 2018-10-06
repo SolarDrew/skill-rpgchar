@@ -62,14 +62,17 @@ class Character:
             await self.die(opsdroid, message)
         else:
             await put_character(self, opsdroid, message.room)
-			
-    async def add_health(self, ndamage, opsdroid, message):
-        """Add health to the character by e.g. a spell heal."""
+
+    async def add_health(self, nhealth):
+        """Add health to the character by e.g. a spell heal. Can exceed max HP."""
         # extra health happens
-        self.current_hp += ndamage
+        self.current_hp += nhealth
 
     def heal(self, nhealth):
-        """Add health to the character up to their maximum hit points."""
+        """
+        Add health to the character up to their maximum hit points.
+        Healing is capped at the player's max HP.
+        """
         self.current_hp = min(self.max_hp, self.current_hp+nhealth)
 
     def gain_xp(self, nXP):
@@ -177,7 +180,7 @@ class Character:
         await message.respond(f"({', '.join([f'{name}: {val}' for name, val in dmg_roll.items()])})")
 
         return dmg_roll, dmg_total
-		
+
     async def roll_spelldamage(self, target, weapon_name, message, opsdroid, critical=False):
         weapon = self.weapons[weapon_name]
 
@@ -200,8 +203,8 @@ class Character:
         await message.respond(f"({', '.join([f'{name}: {val}' for name, val in dmg_roll.items()])})")
 
         return dmg_roll, dmg_total
-		
-	async def roll_heal(self, target, weapon_name, message, opsdroid):
+
+    async def roll_heal(self, target, weapon_name, message, opsdroid):
         weapon = self.weapons[weapon_name]
 
         mods = od({weapon['modifier']: self.modifier(weapon['modifier'])})
@@ -209,7 +212,6 @@ class Character:
         match = re.match("(?P<ndice>\d+)?(?:d(?P<dice>\d+))", weapon['damage'])
         ndice = match.group('ndice')
         ndice = int(ndice) if ndice else 1
-        ndice = ndice * 2 if critical else ndice
         dice = int(match.group('dice'))
 
         dmg_roll = od()

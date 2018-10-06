@@ -87,9 +87,8 @@ async def attack(opsdroid, config, message):
         dmg_roll, dmg_total = await attacker.roll_damage(defender, weapon, message, opsdroid,
                                                          critical=(roll==20))
 
-														 
+
 @match_regex(f'{OBJECT} {SPL_VERB} {HEAL_SPELL} on {SUBJECT}'
-             f'( with (?P<adv>advantage|disadvantage))?',
              case_sensitive=False)
 @match_active_player
 async def castheal(opsdroid, config, message):
@@ -108,8 +107,9 @@ async def castheal(opsdroid, config, message):
     defender = await get_character(def_name, opsdroid, config, message)
     weapon = match('HEAL_SPELL')
 
-	dmg_roll, dmg_total = await attacker.roll_heal(defender, weapon, message, opsdroid)
-	
+    dmg_roll, dmg_total = await attacker.roll_heal(defender, weapon, message, opsdroid)
+
+
 @match_regex(f'{OBJECT} {SPL_VERB} {ATK_SPELL} on {SUBJECT} '
              f'( with (?P<adv>advantage|disadvantage))?',
              case_sensitive=False)
@@ -134,8 +134,8 @@ async def castdmg(opsdroid, config, message):
         adv = -1 if 'dis' in adv else 1
     logging.debug(adv)
 
-    atk_roll, atk_total = await attacker.attack(defender, weapon,  message, adv)
+    atk_roll, atk_total = await attacker.attack(defender, weapon, message, adv)
     roll = atk_roll['roll']
     if atk_total >= defender.AC or roll == 20 and roll != 1:
         dmg_roll, dmg_total = await attacker.roll_spelldamage(defender, weapon, message, opsdroid,
-                                                         critical=(roll==20))
+                                                              critical=(roll==20))
