@@ -313,7 +313,7 @@ async def load_character(opsdroid, config, message):
 @match_gm
 async def remove_character(opsdroid, config, message):
     match = message.regex.group
-    name = match('object').title()
+    name = match('object')#.title()
     room = match('memroom')
     room = room if room else message.room
 

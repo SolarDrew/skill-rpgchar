@@ -140,7 +140,7 @@ async def add_event(opsdroid, config, message):
 @match_gm
 async def remove_item(opsdroid, config, message):
     match = message.regex.group
-    name = match('name').title()
+    name = match('name')#.title()
     room = match('memroom')
     room = room if room else message.room
 
