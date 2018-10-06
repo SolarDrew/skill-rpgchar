@@ -11,6 +11,7 @@ ATK_VERB = '(hits?|attacks?|swings? at|shoots?)'
 WEAPON = '(?P<weapon>\w+)'
 
 SPL_VERB = '(casts?)'
-HEAL_SPELL = '(false life)'
+HEAL_SPELL = '(false_life)'
+ATK_SPELL = '(firebolt|ray_of_frost|magic_missile)'
 
 GAIN_VERB = '(gets?|gains?)'

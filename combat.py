@@ -88,13 +88,13 @@ async def attack(opsdroid, config, message):
                                                          critical=(roll==20))
 
 														 
-@match_regex(f'{OBJECT} {SPL_VERB} {SUBJECT} with {POSSESSIVE} {HEAL_SPELL}'
+@match_regex(f'{OBJECT} {SPL_VERB} {HEAL_SPELL} on {SUBJECT}'
              f'( with (?P<adv>advantage|disadvantage))?',
              case_sensitive=False)
 @match_active_player
 async def castheal(opsdroid, config, message):
     """
-    Detect when a character is attacking another character.
+    Detect when a character is healing another character.
     Just handles the overall flow of the interaction, rolls are dealt with elsewhere.
     """
     match = message.regex.group
@@ -109,3 +109,33 @@ async def castheal(opsdroid, config, message):
     weapon = match('HEAL_SPELL')
 
 	dmg_roll, dmg_total = await attacker.roll_heal(defender, weapon, message, opsdroid)
+	
+@match_regex(f'{OBJECT} {SPL_VERB} {ATK_SPELL} on {SUBJECT} '
+             f'( with (?P<adv>advantage|disadvantage))?',
+             case_sensitive=False)
+@match_active_player
+async def castdmg(opsdroid, config, message):
+    """
+    Detect when a character is attacking another character with a spell.
+    Just handles the overall flow of the interaction, rolls are dealt with elsewhere.
+    """
+    match = message.regex.group
+
+    # Get characters
+    atkr_name = match('object')
+    if atkr_name.upper() == 'I':
+        atkr_name = message.user
+    attacker = await get_character(atkr_name, opsdroid, config, message)
+    def_name = match('subject')
+    defender = await get_character(def_name, opsdroid, config, message)
+    weapon = match('ATK_SPELL')
+    adv = match('adv')
+    if adv:
+        adv = -1 if 'dis' in adv else 1
+    logging.debug(adv)
+
+    atk_roll, atk_total = await attacker.attack(defender, weapon,  message, adv)
+    roll = atk_roll['roll']
+    if atk_total >= defender.AC or roll == 20 and roll != 1:
+        dmg_roll, dmg_total = await attacker.roll_spelldamage(defender, weapon, message, opsdroid,
+                                                         critical=(roll==20))
