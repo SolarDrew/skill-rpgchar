@@ -88,7 +88,7 @@ async def attack(opsdroid, config, message):
                                                          critical=(roll==20))
 
 
-@match_regex(f'{OBJECT} {SPL_VERB} {HEAL_SPELL} on {SUBJECT}'
+@match_regex(f'{OBJECT} {SPL_VERB} {HEAL_SPELL} on {SUBJECT}',
              case_sensitive=False)
 @match_active_player
 async def castheal(opsdroid, config, message):
