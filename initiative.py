@@ -99,7 +99,7 @@ async def next_player(opsdroid, config, message):
 @match_gm
 async def add_character(opsdroid, config, message):
     match = message.regex.group
-    charname = match('name').title()
+    charname = match('name')#.title()
     initval = int(match('initval'))
     room = match('memroom')
     room = room if room else message.room
